@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Connection Agent Console — Live Simulation</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: rgba(0,0,0,0.02);
+      --panel-2: #f5f5f7;
+      --border: rgba(0,0,0,0.1);
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --faint: #86868b;
+      --accent: #0071e3;
+      --ccm: #0071e3;
+      --isu: #0A6ED1;
+      --wam: #7c3aed;
+      --gis: #2E7D32;
+      --sfs: #E65100;
+      --ds:  #b47c00;
+      --dig: #3a3a3c;
+      --lean: #0071e3;
+      --hybrid: #7c3aed;
+      --agentic: #0a7a3b;
+      --good: #0a7a3b;
+      --warn: #c2410c;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: "SF Pro Text", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      padding: 0 22px; height: 44px;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      flex-shrink: 0;
+    }
+    .htitle { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+    .crumb { color: var(--muted); font-size: 0.78rem; }
+    .divider { width: 1px; height: 16px; background: var(--border); }
+    .hactions { display: flex; align-items: center; gap: 14px; }
+    .status {
+      display: flex; align-items: center; gap: 7px;
+      padding: 4px 12px; border-radius: 980px;
+      font-size: 11px; font-weight: 600; border: 1px solid;
+      background: rgba(10,122,59,0.08); border-color: rgba(10,122,59,0.3); color: var(--good);
+    }
+    .status .pulse {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--good);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+    .exit { color: var(--accent); text-decoration: none; font-size: 12px; }
+    .exit:hover { opacity: 0.7; }
+
+    /* CONTROL BAR */
+    .controls {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 22px;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .scenario-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-right: 4px; }
+    .scenario-btn {
+      padding: 6px 14px; border-radius: 980px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      background: #fff; border: 1px solid var(--border); color: var(--text);
+      transition: all 0.2s;
+    }
+    .scenario-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .scenario-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .run-btn {
+      margin-left: auto;
+      padding: 7px 18px; border-radius: 980px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      background: var(--accent); border: 1px solid var(--accent); color: #fff;
+      transition: all 0.2s;
+    }
+    .run-btn:hover { background: #0077ed; }
+    .run-btn:disabled { background: #c7c7cc; border-color: #c7c7cc; cursor: wait; }
+    .reset-btn {
+      padding: 7px 14px; border-radius: 980px;
+      font-size: 12px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--text); }
+    .timer { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-right: 8px; }
+
+    /* AGENT DOCK */
+    .dock {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; padding: 14px 22px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0; flex-wrap: wrap;
+    }
+    .agent {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 99px;
+      transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+      opacity: 0.45; filter: grayscale(100%);
+    }
+    .agent.active { opacity: 1; filter: none; box-shadow: 0 0 0 3px rgba(10,122,59,0.12); border-color: var(--agentic); }
+    .agent.done { opacity: 1; filter: none; border-color: var(--good); }
+    .agent-icon {
+      width: 22px; height: 22px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff;
+      background: var(--agentic);
+    }
+    .agent span { font-size: 11.5px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+
+    /* LAYOUT */
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr 320px;
+      flex: 1; min-height: 0;
+    }
+    .col {
+      display: flex; flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: #fff;
+    }
+    .col:last-child { border-right: none; }
+    .phead {
+      padding: 10px 18px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-2);
+      flex-shrink: 0;
+    }
+    .pcontent { flex: 1; overflow-y: auto; padding: 16px; scroll-behavior: smooth; }
+
+    /* LEFT — systems & tools used */
+    .sys-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #fff;
+      transition: all 0.3s;
+    }
+    .sys-card.pulse { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.08); }
+    .sys-row { display: flex; align-items: center; gap: 8px; }
+    .sys-chip {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff;
+    }
+    .sys-chip.ccm { background: var(--ccm); }
+    .sys-chip.isu { background: var(--isu); }
+    .sys-chip.wam { background: var(--wam); }
+    .sys-chip.gis { background: var(--gis); }
+    .sys-chip.sfs { background: var(--sfs); }
+    .sys-chip.ds  { background: var(--ds); }
+    .sys-chip.dig { background: var(--dig); }
+    .sys-meta { flex: 1; min-width: 0; }
+    .sys-name { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+    .sys-role { font-size: 10.5px; color: var(--muted); }
+    .sys-count {
+      font-size: 10px; font-weight: 600; color: var(--accent);
+      background: rgba(0,113,227,0.08); padding: 2px 7px; border-radius: 980px;
+    }
+    .sys-count.idle { color: var(--faint); background: var(--panel-2); }
+
+    /* CENTER — Event stream */
+    .event {
+      border-left: 3px solid var(--border);
+      background: var(--panel-2);
+      padding: 12px 14px; border-radius: 0 6px 6px 0;
+      margin-bottom: 10px;
+      font-size: 13px; line-height: 1.5;
+      animation: slideIn 0.36s ease both;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .event.agentic { border-left-color: var(--agentic); background: rgba(10,122,59,0.04); }
+    .event.hybrid  { border-left-color: var(--hybrid);  background: rgba(124,58,237,0.04); }
+    .event.lean    { border-left-color: var(--lean);    background: rgba(0,113,227,0.04); }
+    .event.user    { border-left-color: #86868b; background: rgba(0,0,0,0.03); }
+    .event.success { border-left-color: var(--good); background: rgba(10,122,59,0.06); }
+    .e-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .e-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--faint); }
+    .e-badge {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em;
+      padding: 1px 7px; border-radius: 980px; text-transform: uppercase;
+      border: 1px solid;
+    }
+    .e-badge.agentic { color: var(--agentic); background: rgba(10,122,59,0.08); border-color: rgba(10,122,59,0.28); }
+    .e-badge.hybrid  { color: var(--hybrid);  background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.28); }
+    .e-badge.lean    { color: var(--lean);    background: rgba(0,113,227,0.08); border-color: rgba(0,113,227,0.28); }
+    .e-badge.user    { color: var(--text);    background: rgba(0,0,0,0.04); border-color: var(--border); }
+    .e-badge.success { color: var(--good); background: rgba(10,122,59,0.1); border-color: rgba(10,122,59,0.3); }
+    .e-actor { font-size: 11.5px; font-weight: 600; color: var(--text); }
+    .e-msg { color: var(--text); font-size: 12.5px; }
+    .e-tools {
+      display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap;
+    }
+    .e-tool {
+      font-size: 10px; font-weight: 600; color: #fff;
+      padding: 2px 8px; border-radius: 980px;
+    }
+    .e-tool.ccm { background: var(--ccm); }
+    .e-tool.isu { background: var(--isu); }
+    .e-tool.wam { background: var(--wam); }
+    .e-tool.gis { background: var(--gis); }
+    .e-tool.sfs { background: var(--sfs); }
+    .e-tool.ds  { background: var(--ds); }
+    .e-tool.dig { background: var(--dig); }
+    .e-tool.ml  { background: #111; }
+
+    .empty {
+      text-align: center; padding: 60px 24px; color: var(--faint);
+      font-size: 13px;
+    }
+    .empty .big { font-size: 36px; margin-bottom: 10px; opacity: 0.4; }
+
+    /* RIGHT — decisions + outcome */
+    .dec-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; margin-bottom: 10px; background: #fff;
+    }
+    .dec-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .dec-val { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); margin-bottom: 4px; }
+    .dec-sub { font-size: 11px; color: var(--muted); }
+    .dec-card.hl { border-color: var(--agentic); background: rgba(10,122,59,0.04); }
+    .dec-card.hl .dec-val { color: var(--agentic); }
+
+    .timeline-mini { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .tl-step {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      font-size: 11.5px; border: 1px solid var(--border);
+      background: #fff;
+    }
+    .tl-step.done { background: rgba(10,122,59,0.05); border-color: rgba(10,122,59,0.22); }
+    .tl-step.active { background: rgba(0,113,227,0.05); border-color: rgba(0,113,227,0.28); font-weight: 600; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .tl-step.done .tl-dot { background: var(--good); }
+    .tl-step.active .tl-dot { background: var(--accent); animation: pulse 1.3s infinite; }
+    .tl-step .t { flex: 1; }
+    .tl-step .elapsed { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--faint); }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 250px 1fr 280px; }
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .col:nth-child(1), .col:nth-child(3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="htitle">
+    <a href="index.html" style="color:var(--text);text-decoration:none;">⚡ New Connection Agent</a>
+    <span class="divider"></span>
+    <span class="crumb">Console · Live Orchestration</span>
+  </div>
+  <div class="hactions">
+    <div class="status"><span class="pulse"></span> Agents online · 7 systems</div>
+    <a href="index.html" class="exit">← Exit</a>
+  </div>
+</header>
+
+<div class="controls">
+  <span class="scenario-label">Scenario</span>
+  <button class="scenario-btn active" data-sc="residential">Residential — 400A new service</button>
+  <button class="scenario-btn" data-sc="commercial">Commercial — 1 MW with design exception</button>
+  <span class="timer" id="timer">T+0.0s</span>
+  <button class="reset-btn" id="reset">Reset</button>
+  <button class="run-btn" id="run">▶ Run simulation</button>
+</div>
+
+<div class="dock" id="dock">
+  <div class="agent" data-agent="intake">
+    <div class="agent-icon" style="background:var(--ccm);">IA</div>
+    <span>Intake Agent</span>
+  </div>
+  <div class="agent" data-agent="qualify">
+    <div class="agent-icon" style="background:var(--ccm);">QA</div>
+    <span>Qualification Agent</span>
+  </div>
+  <div class="agent" data-agent="premise">
+    <div class="agent-icon" style="background:var(--gis);">PA</div>
+    <span>Premise / TMD</span>
+  </div>
+  <div class="agent" data-agent="design">
+    <div class="agent-icon" style="background:var(--agentic);">DZ</div>
+    <span>Design-from-Zero</span>
+  </div>
+  <div class="agent" data-agent="contract">
+    <div class="agent-icon" style="background:var(--ds);">CA</div>
+    <span>Contract Agent</span>
+  </div>
+  <div class="agent" data-agent="payment">
+    <div class="agent-icon" style="background:var(--isu);">PM</div>
+    <span>Payment Core</span>
+  </div>
+  <div class="agent" data-agent="construction">
+    <div class="agent-icon" style="background:var(--isu);">CO</div>
+    <span>Construction Orch.</span>
+  </div>
+  <div class="agent" data-agent="dispatch">
+    <div class="agent-icon" style="background:var(--sfs);">DA</div>
+    <span>Dispatch Agent</span>
+  </div>
+  <div class="agent" data-agent="field">
+    <div class="agent-icon" style="background:var(--sfs);">FC</div>
+    <span>Field Closeout</span>
+  </div>
+  <div class="agent" data-agent="sync">
+    <div class="agent-icon" style="background:var(--gis);">GS</div>
+    <span>GIS Sync</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- LEFT -->
+  <aside class="col">
+    <div class="phead">Systems &amp; Tool Calls</div>
+    <div class="pcontent" id="sysList">
+      <div class="sys-card" data-sys="dig">
+        <div class="sys-row">
+          <div class="sys-chip dig">DIG</div>
+          <div class="sys-meta"><div class="sys-name">Digital Portal</div><div class="sys-role">Customer intake channel</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="ccm">
+        <div class="sys-row">
+          <div class="sys-chip ccm">CCM</div>
+          <div class="sys-meta"><div class="sys-name">CCM</div><div class="sys-role">Opportunity &amp; documents</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="gis">
+        <div class="sys-row">
+          <div class="sys-chip gis">GIS</div>
+          <div class="sys-meta"><div class="sys-name">GIS</div><div class="sys-role">Spatial network · TMD</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="wam">
+        <div class="sys-row">
+          <div class="sys-chip wam">WAM</div>
+          <div class="sys-meta"><div class="sys-name">SAP WAM</div><div class="sys-role">Assets &amp; materials</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="isu">
+        <div class="sys-row">
+          <div class="sys-chip isu">ISU</div>
+          <div class="sys-meta"><div class="sys-name">SAP ISU</div><div class="sys-role">Contracts · payment · orders</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="sfs">
+        <div class="sys-row">
+          <div class="sys-chip sfs">SFS</div>
+          <div class="sys-meta"><div class="sys-name">SAP SFS</div><div class="sys-role">Dispatch &amp; field execution</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+      <div class="sys-card" data-sys="ds">
+        <div class="sys-row">
+          <div class="sys-chip ds">DS</div>
+          <div class="sys-meta"><div class="sys-name">DocuSign</div><div class="sys-role">Contract e-signature</div></div>
+          <div class="sys-count idle">0</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <main class="col">
+    <div class="phead">Live Event Stream</div>
+    <div class="pcontent" id="stream">
+      <div class="empty"><div class="big">◉</div>Click <b>Run simulation</b> to watch the agents orchestrate a new connection end-to-end.</div>
+    </div>
+  </main>
+
+  <!-- RIGHT -->
+  <aside class="col">
+    <div class="phead">Decision &amp; Progress</div>
+    <div class="pcontent">
+      <div class="dec-card hl">
+        <div class="dec-label">Connection Status</div>
+        <div class="dec-val" id="kStatus">Awaiting request</div>
+        <div class="dec-sub" id="kSub">0 of 10 steps complete</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-label">Cycle time so far</div>
+        <div class="dec-val" id="kCycle">—</div>
+        <div class="dec-sub">Legacy equivalent: ~47 days</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-label">Human touchpoints</div>
+        <div class="dec-val" id="kHuman">0</div>
+        <div class="dec-sub">Legacy equivalent: 23</div>
+      </div>
+      <div class="dec-card">
+        <div class="dec-label">Design confidence</div>
+        <div class="dec-val" id="kConf">—</div>
+        <div class="dec-sub" id="kConfSub">Design-from-Zero not yet run</div>
+      </div>
+
+      <div class="phead" style="border:none;padding:12px 0 6px;background:none;">Progress</div>
+      <div class="timeline-mini" id="tl"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  const STEPS_META = [
+    { id:'intake',       name:'Intake',              layer:'agentic' },
+    { id:'qualify',      name:'Qualify',             layer:'agentic' },
+    { id:'premise',      name:'Premise / TMD',       layer:'hybrid'  },
+    { id:'design',       name:'Design-from-Zero',    layer:'agentic' },
+    { id:'contract',     name:'Contract',            layer:'hybrid'  },
+    { id:'payment',      name:'Payment',             layer:'lean'    },
+    { id:'construction', name:'Construction Order',  layer:'lean'    },
+    { id:'dispatch',     name:'Dispatch',            layer:'agentic' },
+    { id:'field',        name:'Field Closeout',      layer:'hybrid'  },
+    { id:'sync',         name:'GIS Sync &amp; Close', layer:'lean'   },
+  ];
+
+  // Two scenarios
+  const SCENARIOS = {
+    residential: [
+      { t:0.0,  step:'intake', agent:'Intake Agent', badge:'agentic', actor:'user', msg:'Request received: Alex Martinez, new 400A underground service at Willow Ridge Lot 14.', tools:['dig'] },
+      { t:1.5,  step:'intake', agent:'Intake Agent', badge:'agentic', msg:'Premise geocoded to 2847 Willow Ridge Dr. Builder license verified (valid 2028). Plat pulled from county portal.', tools:['dig','ccm'] },
+      { t:3.0,  step:'qualify', agent:'Qualification Agent', badge:'agentic', msg:'Opportunity OPP-4827 created. Tariff: RES-D. Credit screening: pass. Eligibility: confirmed.', tools:['ccm'] },
+      { t:5.2,  step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid', msg:'TMD pulled from GIS; reconciled with WAM asset record for transformer P#487319. Delta 0.4% — auto-accepted.', tools:['gis','wam'] },
+      { t:7.8,  step:'design', agent:'Design-from-Zero Agent', badge:'agentic', msg:'Load calc: 312 A diversified. Routing 142 ft from primary tap P#487321, avoiding protected oak cluster. Existing 50 kVA transformer has 34% headroom — no upgrade.', tools:['gis','wam','ml'] },
+      { t:9.5,  step:'design', agent:'Design-from-Zero Agent', badge:'agentic', msg:'BOM generated (1× 200 A meter pedestal, 160 ft 4/0 AL URD, 2× pull boxes). Design confidence: 97.2%. No human review required.', tools:['gis','wam','ml'], conf:97.2 },
+      { t:11.2, step:'contract', agent:'Contract Agent', badge:'hybrid', msg:'BMD contract drafted: $8,420 CIAC, $0/mo until energized. DocuSign envelope sent to alex@willowridge.com.', tools:['isu','ds'] },
+      { t:13.8, step:'contract', agent:'Alex Martinez', badge:'user', actor:'user', msg:'Contract signed via DocuSign. Preferred window: Thursday April 16, 7–11 AM.', tools:['ds'], human:true },
+      { t:15.2, step:'payment', agent:'Payment Orchestration (Lean Core)', badge:'lean', msg:'Invoice posted to SAP ISU. $8,420 captured via digital wallet. Escrow held pending energization.', tools:['isu'] },
+      { t:16.5, step:'construction', agent:'Construction Order Release', badge:'lean', msg:'SAP ISU released Construction Order CO-338412. Materials reserved at WH-North. Notification propagated.', tools:['isu','wam'] },
+      { t:18.0, step:'dispatch', agent:'Dispatch Agent', badge:'agentic', msg:'Optimized against weather, traffic, skill mix, overtime budget. Crew Blue-7 (Rodriguez + Chen) assigned. SLA confidence: 96%.', tools:['sfs'] },
+      { t:20.2, step:'field', agent:'Field Closeout Agent', badge:'hybrid', msg:'[Day 3] Crew on site 07:14 AM. As-built photos captured. AI vision validated meter install, grounding, depth. Passed safety compliance checks.', tools:['sfs'] },
+      { t:22.0, step:'sync', agent:'GIS Sync (Lean Core)', badge:'lean', msg:'TMD updated in GIS with as-built geometry. Meter MTR-99284 activated in SAP ISU. Opportunity OPP-4827 closed. Billing started.', tools:['gis','isu'] },
+      { t:23.5, step:'sync', agent:'System', badge:'success', msg:'End-to-end complete. Total human touchpoints: 1 (contract signature). Cycle time: 3.8 days vs. 47-day baseline.', tools:[] },
+    ],
+    commercial: [
+      { t:0.0,  step:'intake', agent:'Intake Agent', badge:'agentic', actor:'user', msg:'Request received: BrightLogix Manufacturing, 1 MW 3-phase service, new warehouse at 1400 Industrial Pkwy.', tools:['dig'] },
+      { t:2.0,  step:'intake', agent:'Intake Agent', badge:'agentic', msg:'Premise geocoded. Business entity verified via SoS. Load sheet ingested from PDF.', tools:['dig','ccm'] },
+      { t:3.5,  step:'qualify', agent:'Qualification Agent', badge:'agentic', msg:'Opportunity OPP-4828 created. Tariff: GS-3 (large commercial). Credit: A-rated. Zoning: compliant.', tools:['ccm'] },
+      { t:5.8,  step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid', msg:'TMD reconciled. GIS shows nearest 3-phase primary 880 ft away. WAM capacity report queued.', tools:['gis','wam'] },
+      { t:8.8,  step:'design', agent:'Design-from-Zero Agent', badge:'agentic', msg:'Load: 1.04 MVA. Nearest 3-phase tap requires 880 ft run + new pad-mount transformer. Substation headroom: 62% — OK.', tools:['gis','wam','ml'] },
+      { t:11.3, step:'design', agent:'Design-from-Zero Agent', badge:'agentic', msg:'⚠ Route conflict detected: proposed ROW crosses a wetland polygon. Two alternates generated. Confidence: 71%. Escalating to Senior Engineer for review.', tools:['gis','ml'], conf:71, alert:true },
+      { t:13.5, step:'design', agent:'Senior Engineer (J. Okafor)', badge:'user', actor:'user', msg:'Alternate B approved (west side along existing utility corridor, adds 210 ft). Override logged.', tools:[], human:true },
+      { t:15.0, step:'design', agent:'Design-from-Zero Agent', badge:'agentic', msg:'Design re-optimized with override. Updated BOM. Final confidence: 94.8%. Ready for contract.', tools:['gis','wam','ml'], conf:94.8 },
+      { t:17.0, step:'contract', agent:'Contract Agent', badge:'hybrid', msg:'Commercial BMD drafted: $214,800 CIAC + $4,200/mo demand charge. DocuSign sent to CFO and facilities lead.', tools:['isu','ds'] },
+      { t:19.5, step:'contract', agent:'BrightLogix (CFO)', badge:'user', actor:'user', msg:'Contract signed. Target energize: June 2.', tools:['ds'], human:true },
+      { t:21.0, step:'payment', agent:'Payment Orchestration (Lean Core)', badge:'lean', msg:'ACH wire received: $214,800. Escrow set. ISU billing profile activated.', tools:['isu'] },
+      { t:22.2, step:'construction', agent:'Construction Order Release', badge:'lean', msg:'CO-338601 released. Long-lead item (pad-mount transformer) flagged — 14-day delivery. Crew schedule aligned.', tools:['isu','wam'] },
+      { t:23.8, step:'dispatch', agent:'Dispatch Agent', badge:'agentic', msg:'Multi-day crew plan built (trenching T-7, cable pull T-5, transformer set T-1). Construction agents coordinated.', tools:['sfs'] },
+      { t:25.4, step:'field', agent:'Field Closeout Agent', badge:'hybrid', msg:'[Week 3] All milestones validated. As-built confirms Alternate B route. Commissioning tests passed.', tools:['sfs'] },
+      { t:27.0, step:'sync', agent:'GIS Sync (Lean Core)', badge:'lean', msg:'GIS updated with new pad-mount, 880+210 ft URD. Meter activated. Opportunity closed.', tools:['gis','isu'] },
+      { t:28.2, step:'sync', agent:'System', badge:'success', msg:'Complete. Human touchpoints: 2 (engineer override + CFO signature). Cycle time: 18 days vs. 94-day baseline.', tools:[] },
+    ],
+  };
+
+  const $stream = document.getElementById('stream');
+  const $timer = document.getElementById('timer');
+  const $tl = document.getElementById('tl');
+  const $dock = document.getElementById('dock');
+  const $sysList = document.getElementById('sysList');
+  const $run = document.getElementById('run');
+  const $reset = document.getElementById('reset');
+
+  const $kStatus = document.getElementById('kStatus');
+  const $kSub = document.getElementById('kSub');
+  const $kCycle = document.getElementById('kCycle');
+  const $kHuman = document.getElementById('kHuman');
+  const $kConf = document.getElementById('kConf');
+  const $kConfSub = document.getElementById('kConfSub');
+
+  let scenarioKey = 'residential';
+  let timerId = null;
+  let running = false;
+  let humanCount = 0;
+  let sysCounts = { dig:0, ccm:0, gis:0, wam:0, isu:0, sfs:0, ds:0 };
+  let stepsDone = new Set();
+
+  function buildTimeline() {
+    $tl.innerHTML = '';
+    STEPS_META.forEach(s => {
+      const d = document.createElement('div');
+      d.className = 'tl-step';
+      d.dataset.step = s.id;
+      d.innerHTML = `<span class="tl-dot"></span><span class="t">${s.name}</span><span class="elapsed"></span>`;
+      $tl.appendChild(d);
+    });
+  }
+
+  function reset() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    running = false;
+    humanCount = 0;
+    sysCounts = { dig:0, ccm:0, gis:0, wam:0, isu:0, sfs:0, ds:0 };
+    stepsDone.clear();
+    $stream.innerHTML = '<div class="empty"><div class="big">◉</div>Click <b>Run simulation</b> to watch the agents orchestrate a new connection end-to-end.</div>';
+    $timer.textContent = 'T+0.0s';
+    $run.disabled = false;
+    $run.textContent = '▶ Run simulation';
+    $kStatus.textContent = 'Awaiting request';
+    $kSub.textContent = '0 of 10 steps complete';
+    $kCycle.textContent = '—';
+    $kHuman.textContent = '0';
+    $kConf.textContent = '—';
+    $kConfSub.textContent = 'Design-from-Zero not yet run';
+    $dock.querySelectorAll('.agent').forEach(a => { a.classList.remove('active','done'); });
+    $sysList.querySelectorAll('.sys-card').forEach(c => {
+      c.classList.remove('pulse');
+      c.querySelector('.sys-count').textContent = '0';
+      c.querySelector('.sys-count').classList.add('idle');
+    });
+    buildTimeline();
+  }
+
+  function markStepActive(stepId) {
+    document.querySelectorAll('.tl-step').forEach(s => s.classList.remove('active'));
+    const el = document.querySelector(`.tl-step[data-step="${stepId}"]`);
+    if (el) el.classList.add('active');
+    $dock.querySelectorAll('.agent').forEach(a => a.classList.remove('active'));
+    const dockEl = $dock.querySelector(`.agent[data-agent="${stepId}"]`);
+    if (dockEl) dockEl.classList.add('active');
+  }
+  function markStepDone(stepId, elapsedLabel) {
+    stepsDone.add(stepId);
+    const el = document.querySelector(`.tl-step[data-step="${stepId}"]`);
+    if (el) {
+      el.classList.remove('active'); el.classList.add('done');
+      if (elapsedLabel) el.querySelector('.elapsed').textContent = elapsedLabel;
+    }
+    const dockEl = $dock.querySelector(`.agent[data-agent="${stepId}"]`);
+    if (dockEl) { dockEl.classList.remove('active'); dockEl.classList.add('done'); }
+    $kSub.textContent = `${stepsDone.size} of 10 steps complete`;
+  }
+  function pulseSystem(sys) {
+    const card = $sysList.querySelector(`.sys-card[data-sys="${sys}"]`);
+    if (!card) return;
+    card.classList.add('pulse');
+    sysCounts[sys] = (sysCounts[sys]||0) + 1;
+    const cnt = card.querySelector('.sys-count');
+    cnt.textContent = sysCounts[sys];
+    cnt.classList.remove('idle');
+    setTimeout(() => card.classList.remove('pulse'), 900);
+  }
+  function pushEvent(ev, t) {
+    if ($stream.querySelector('.empty')) $stream.innerHTML = '';
+    const node = document.createElement('div');
+    node.className = 'event ' + ev.badge;
+    const tools = (ev.tools||[]).map(tl => `<span class="e-tool ${tl}">${tl==='ml'?'ML':tl.toUpperCase()}</span>`).join('');
+    node.innerHTML = `
+      <div class="e-head">
+        <span class="e-time">T+${t.toFixed(1)}s</span>
+        <span class="e-badge ${ev.badge}">${ev.badge==='user'?'human':ev.badge}</span>
+        <span class="e-actor">${ev.agent}</span>
+      </div>
+      <div class="e-msg">${ev.msg}</div>
+      ${tools ? `<div class="e-tools">${tools}</div>` : ''}
+    `;
+    $stream.appendChild(node);
+    $stream.scrollTop = $stream.scrollHeight;
+
+    // update KPIs
+    if (ev.human) { humanCount++; $kHuman.textContent = humanCount; }
+    (ev.tools||[]).forEach(pulseSystem);
+    if (typeof ev.conf === 'number') {
+      $kConf.textContent = ev.conf.toFixed(1) + '%';
+      $kConf.style.color = ev.conf >= 90 ? 'var(--agentic)' : 'var(--warn)';
+      $kConfSub.textContent = ev.conf >= 90 ? 'Auto-approved · no review' : 'Below threshold · routed to engineer';
+    }
+    if (ev.badge === 'success') {
+      $kStatus.textContent = 'Connection complete';
+    } else {
+      $kStatus.textContent = ev.agent;
+    }
+  }
+
+  function runSim() {
+    reset();
+    const events = SCENARIOS[scenarioKey];
+    running = true;
+    $run.disabled = true;
+    $run.textContent = '⏵ Running...';
+    const startPerf = performance.now();
+    let idx = 0;
+    let currentStep = null;
+
+    timerId = setInterval(() => {
+      const elapsed = (performance.now() - startPerf) / 1000;
+      $timer.textContent = `T+${elapsed.toFixed(1)}s`;
+      $kCycle.textContent = `${elapsed.toFixed(1)}s (compressed)`;
+
+      while (idx < events.length && events[idx].t <= elapsed) {
+        const ev = events[idx];
+        if (ev.step !== currentStep) {
+          if (currentStep) markStepDone(currentStep, '✓');
+          currentStep = ev.step;
+          markStepActive(currentStep);
+        }
+        pushEvent(ev, elapsed);
+        idx++;
+      }
+
+      if (idx >= events.length) {
+        if (currentStep) markStepDone(currentStep, '✓');
+        clearInterval(timerId); timerId = null;
+        running = false;
+        $run.disabled = false;
+        $run.textContent = '▶ Run again';
+      }
+    }, 80);
+  }
+
+  // Scenario switching
+  document.querySelectorAll('.scenario-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (running) return;
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      scenarioKey = btn.dataset.sc;
+      reset();
+    });
+  });
+  $run.addEventListener('click', runSim);
+  $reset.addEventListener('click', reset);
+
+  buildTimeline();
+</script>
+</body>
+</html>

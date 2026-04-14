@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Story — New Connection Experience Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f5f5f7;
+      --border: rgba(0,0,0,0.1);
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --faint: #86868b;
+      --accent: #0071e3;
+      --accent-2: #0077ed;
+      --lean: #0071e3;
+      --hybrid: #7c3aed;
+      --agentic: #0a7a3b;
+      --warn: #c2410c;
+      --green: #0a7a3b;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px; height: 44px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 0.6rem; }
+    .brand a { color: var(--text); text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: -0.01em; }
+    .divider { width: 1px; height: 16px; background: var(--border); }
+    .crumb { font-size: 0.78rem; color: var(--muted); }
+    .nav { display: flex; gap: 0.08rem; }
+    .nav a {
+      font-size: 0.75rem; color: var(--muted); text-decoration: none;
+      padding: 0.28rem 0.65rem; border-radius: 980px;
+      transition: all 0.2s;
+    }
+    .nav a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+    .nav a.active { color: var(--accent); background: rgba(0,113,227,0.09); }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.vis { opacity: 1; transform: translateY(0); }
+
+    section.story {
+      min-height: 90vh;
+      display: flex; align-items: center;
+      padding: 4.5rem 2rem;
+      position: relative;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; width: 100%; }
+    .eyebrow {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.9rem;
+    }
+    h1 {
+      font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+      font-weight: 600; letter-spacing: -0.015em; line-height: 1.05;
+      margin-bottom: 1.25rem;
+    }
+    h1 .hi { color: var(--accent-2); }
+    h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 600; letter-spacing: -0.015em; line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .lede { font-size: 1.15rem; color: var(--muted); max-width: 680px; line-height: 1.55; }
+
+    /* HERO */
+    .hero-extras { margin-top: 2.5rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.95rem; border-radius: 980px;
+      font-size: 0.78rem; font-weight: 500; border: 1px solid;
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .pill.lean    { background: rgba(0,113,227,0.08);  border-color: rgba(0,113,227,0.28);  color: var(--lean); }
+    .pill.lean    .pill-dot { background: var(--lean); }
+    .pill.hybrid  { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.28); color: var(--hybrid); }
+    .pill.hybrid  .pill-dot { background: var(--hybrid); }
+    .pill.agentic { background: rgba(10,122,59,0.08);  border-color: rgba(10,122,59,0.28);  color: var(--agentic); }
+    .pill.agentic .pill-dot { background: var(--agentic); }
+
+    /* Before / After side-by-side */
+    .ba {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 800px) { .ba { grid-template-columns: 1fr; } }
+    .ba-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.6rem;
+    }
+    .ba-card.before { border-color: rgba(194,65,12,0.22); background: linear-gradient(180deg, #fff7ed 0%, #fff 60%); }
+    .ba-card.after  { border-color: rgba(10,122,59,0.22); background: linear-gradient(180deg, #f0fdf4 0%, #fff 60%); }
+    .ba-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.7rem;
+    }
+    .ba-card.before .ba-label { color: var(--warn); }
+    .ba-card.after  .ba-label { color: var(--green); }
+    .ba-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; letter-spacing: -0.01em; }
+    .ba-stat {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.5rem 0; border-top: 1px solid var(--border);
+    }
+    .ba-stat:first-of-type { border-top: none; }
+    .ba-stat .k { color: var(--muted); font-size: 0.85rem; }
+    .ba-stat .v { font-weight: 600; font-size: 1.05rem; }
+    .ba-card.after .v { color: var(--green); }
+
+    /* Step card */
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem; margin-top: 2.5rem;
+    }
+    .step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.3rem; position: relative;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(0,0,0,0.07); border-color: rgba(0,113,227,0.25); }
+    .step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface2); color: var(--text);
+      font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-layer {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.55rem; border-radius: 980px;
+      border: 1px solid;
+    }
+    .step-layer.lean    { background: rgba(0,113,227,0.08);  border-color: rgba(0,113,227,0.28);  color: var(--lean); }
+    .step-layer.hybrid  { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.28); color: var(--hybrid); }
+    .step-layer.agentic { background: rgba(10,122,59,0.08);  border-color: rgba(10,122,59,0.28);  color: var(--agentic); }
+    .step h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; letter-spacing: -0.005em; }
+    .step p { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+    .step-meta {
+      display: flex; gap: 0.6rem; margin-top: 0.9rem; flex-wrap: wrap;
+      font-size: 0.72rem; color: var(--faint);
+    }
+    .step-meta span {
+      background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 6px;
+    }
+
+    /* Timeline row */
+    .timeline {
+      display: flex; align-items: center; overflow-x: auto; padding: 1rem 0 0.5rem;
+      margin-top: 1.5rem; scrollbar-width: thin;
+    }
+    .tl-node {
+      flex-shrink: 0; width: 110px; text-align: center;
+      padding: 0.7rem 0.4rem;
+      border-radius: 10px;
+      margin-right: 0.55rem;
+      position: relative;
+    }
+    .tl-node.lean    { background: rgba(0,113,227,0.06);  border: 1px solid rgba(0,113,227,0.2); }
+    .tl-node.hybrid  { background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.2); }
+    .tl-node.agentic { background: rgba(10,122,59,0.06);  border: 1px solid rgba(10,122,59,0.2); }
+    .tl-node .n { font-size: 0.65rem; color: var(--faint); font-weight: 700; letter-spacing: 0.06em; }
+    .tl-node .t { font-size: 0.75rem; font-weight: 600; margin-top: 0.15rem; line-height: 1.25; }
+    .tl-node .s { font-size: 0.66rem; color: var(--muted); margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+    .tl-arrow {
+      flex-shrink: 0; width: 16px; height: 2px; background: var(--border);
+      margin-right: 0.55rem;
+    }
+
+    /* KPI strip */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; }
+    .kpi .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .kpi .num { font-size: 2.1rem; font-weight: 600; letter-spacing: -0.02em; margin-top: 0.3rem; color: var(--accent); }
+    .kpi .delta { font-size: 0.8rem; color: var(--green); margin-top: 0.3rem; }
+
+    /* Conversation bubbles */
+    .convo { margin-top: 1.8rem; display: flex; flex-direction: column; gap: 0.7rem; }
+    .msg {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      max-width: 720px;
+    }
+    .msg.agent { align-self: flex-start; }
+    .msg.user  { align-self: flex-end; flex-direction: row-reverse; }
+    .msg .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+    }
+    .msg.agent .avatar { background: rgba(10,122,59,0.1); color: var(--agentic); border: 1px solid rgba(10,122,59,0.28); }
+    .msg.user .avatar  { background: rgba(0,113,227,0.1); color: var(--accent); border: 1px solid rgba(0,113,227,0.28); }
+    .msg .bub {
+      padding: 0.65rem 0.9rem; border-radius: 12px;
+      font-size: 0.88rem; line-height: 1.5;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .msg.user .bub { background: rgba(0,113,227,0.06); border-color: rgba(0,113,227,0.25); }
+    .msg .by { font-size: 0.7rem; color: var(--faint); margin-bottom: 0.15rem; }
+
+    /* Section variations */
+    section.alt { background: var(--surface2); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem 22px;
+      font-size: 0.78rem; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <a href="index.html">⚡ New Connection Agent</a>
+    <span class="divider"></span>
+    <span class="crumb">The Story</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="pu-story.html" class="active">Story</a>
+    <a href="pu-agent-console.html">Console</a>
+    <a href="pu-dashboard.html">Dashboard</a>
+  </nav>
+</header>
+
+<!-- ============== HERO ============== -->
+<section class="story">
+  <div class="wrap reveal">
+    <div class="eyebrow">Chapter 1 · A day in the reimagined P&U</div>
+    <h1>From 47 days<br/><span class="hi">to 4 minutes.</span></h1>
+    <p class="lede">A new connection at a mid-sized US utility used to mean 10 manual steps, 6 systems, 4 handoffs, and 47 days of average cycle time. Today, builder Alex Martinez requests a 400-amp service for a new housing development — and watches an autonomous agent orchestra complete the entire journey before the next coffee finishes brewing.</p>
+    <div class="hero-extras">
+      <span class="pill lean"><span class="pill-dot"></span>Lean Core</span>
+      <span class="pill hybrid"><span class="pill-dot"></span>Hybrid Edge</span>
+      <span class="pill agentic"><span class="pill-dot"></span>Agentic Edge</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============== BEFORE / AFTER ============== -->
+<section class="story alt">
+  <div class="wrap reveal">
+    <div class="eyebrow">The shift</div>
+    <h2>Every step, reimagined.</h2>
+    <p class="lede">The same underlying systems — CCM, SAP ISU, SAP WAM, GIS, SFS, Digital, DocuSign — but a fundamentally different operating model.</p>
+    <div class="ba">
+      <div class="ba-card before">
+        <div class="ba-label">Legacy · Today</div>
+        <h3>10 steps · 6 systems · 4 handoffs</h3>
+        <div class="ba-stat"><span class="k">Avg. cycle time</span><span class="v">47 days</span></div>
+        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">23</span></div>
+        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">9 days</span></div>
+        <div class="ba-stat"><span class="k">Rework / escalation rate</span><span class="v">18%</span></div>
+        <div class="ba-stat"><span class="k">Cost per connection (OpEx)</span><span class="v">$1,840</span></div>
+        <div class="ba-stat"><span class="k">Customer NPS</span><span class="v">+12</span></div>
+      </div>
+      <div class="ba-card after">
+        <div class="ba-label">Reimagined · Today</div>
+        <h3>Near-zero-touch · Agent-orchestrated</h3>
+        <div class="ba-stat"><span class="k">Avg. cycle time</span><span class="v">3.8 days</span></div>
+        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">1.4 avg</span></div>
+        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">88 seconds</span></div>
+        <div class="ba-stat"><span class="k">Rework / escalation rate</span><span class="v">2.1%</span></div>
+        <div class="ba-stat"><span class="k">Cost per connection (OpEx)</span><span class="v">$310</span></div>
+        <div class="ba-stat"><span class="k">Customer NPS</span><span class="v">+71</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== THE 10 STEPS REIMAGINED ============== -->
+<section class="story">
+  <div class="wrap reveal">
+    <div class="eyebrow">The orchestra</div>
+    <h2>Ten steps. Ten layers. One flow.</h2>
+    <p class="lede">Each step of the legacy journey is now executed by a Lean Core process, a Hybrid workflow, or an autonomous AI agent — with humans escalated to only when the decision genuinely needs them.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-head"><div class="step-num">1</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Intake Agent</h4>
+        <p>Ingests web, mobile, call-center, and email requests. Extracts intent, parses documents (vision AI), verifies identity via DMV/credit APIs.</p>
+        <div class="step-meta"><span>Digital</span><span>CCM</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">2</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Qualification Agent</h4>
+        <p>Creates the opportunity in CCM, runs eligibility + tariff classification, attaches validated documents — all without a CSR touching the record.</p>
+        <div class="step-meta"><span>CCM</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">3</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>Premise / TMD Reconciliation</h4>
+        <p>Reconciles Technical Master Data between GIS (spatial) and SAP WAM (asset) in a single canonical record. Flags delta &gt;2% for review.</p>
+        <div class="step-meta"><span>GIS</span><span>SAP WAM</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">4</div><span class="step-layer agentic">Agentic ★</span></div>
+        <h4>Design-from-Zero Agent</h4>
+        <p>Generates the full engineered design in 88 s: load calcs, conductor sizing, transformer placement, route optimization against GIS network model, materials BOM.</p>
+        <div class="step-meta"><span>GIS</span><span>SAP WAM</span><span>ML model</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">5</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>Contract Agent</h4>
+        <p>Auto-drafts BMD contract from design output, routes through DocuSign, negotiates scheduling windows via customer portal chat.</p>
+        <div class="step-meta"><span>SAP ISU</span><span>DocuSign</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">6</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>Payment Orchestration</h4>
+        <p>Straight-through invoicing in SAP ISU with digital wallet, escrow-on-construction, and auto-reconciliation. No finance clerk required.</p>
+        <div class="step-meta"><span>SAP ISU</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">7</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>Construction Order Release</h4>
+        <p>SAP ISU auto-releases the construction order with materials pre-staged from the WAM warehouse — notification propagates to downstream systems.</p>
+        <div class="step-meta"><span>SAP ISU</span><span>SAP WAM</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">8</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Dispatch Agent</h4>
+        <p>Optimizes crew assignment against weather, traffic, storm forecasts, skills, SLAs, and overtime budget — beats dispatcher heuristics by 23%.</p>
+        <div class="step-meta"><span>SAP SFS</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">9</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>Field Closeout Agent</h4>
+        <p>Crew captures as-built photos; agent validates meter install, GPS, compliance, safety checks against design. Human only if anomaly detected.</p>
+        <div class="step-meta"><span>SAP SFS</span><span>Mobile</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">10</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>GIS Sync &amp; Close</h4>
+        <p>Autonomous TMD update back to GIS, meter activation in SAP ISU, opportunity closed, billing started — all without a closeout coordinator.</p>
+        <div class="step-meta"><span>GIS</span><span>SAP ISU</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TIMELINE ============== -->
+<section class="story alt">
+  <div class="wrap reveal">
+    <div class="eyebrow">The 4-minute journey</div>
+    <h2>Watch Alex's connection, live.</h2>
+    <p class="lede">Step by step, system by system — what happened between 9:04 AM when the request was submitted and 9:08 AM when construction was scheduled.</p>
+
+    <div class="timeline">
+      <div class="tl-node agentic"><div class="n">T+0s</div><div class="t">Intake</div><div class="s">9:04:00</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node agentic"><div class="n">T+12s</div><div class="t">Qualify</div><div class="s">9:04:12</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node hybrid"><div class="n">T+28s</div><div class="t">Premise TMD</div><div class="s">9:04:28</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node agentic"><div class="n">T+46s</div><div class="t">Design-from-0</div><div class="s">9:04:46</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node hybrid"><div class="n">T+2m 14s</div><div class="t">Contract</div><div class="s">9:06:14</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node lean"><div class="n">T+3m 02s</div><div class="t">Payment</div><div class="s">9:07:02</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node lean"><div class="n">T+3m 18s</div><div class="t">Cons. order</div><div class="s">9:07:18</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node agentic"><div class="n">T+3m 42s</div><div class="t">Dispatch</div><div class="s">9:07:42</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node hybrid"><div class="n">Day 3</div><div class="t">Field exec</div><div class="s">as-built ✓</div></div>
+      <div class="tl-arrow"></div>
+      <div class="tl-node lean"><div class="n">Day 3</div><div class="t">GIS close</div><div class="s">activated</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SNAPSHOT CONVERSATION ============== -->
+<section class="story">
+  <div class="wrap reveal">
+    <div class="eyebrow">A glimpse inside</div>
+    <h2>What the agents are saying.</h2>
+    <p class="lede">Snippets from Alex's actual interaction transcript — customer-facing on one side, inter-agent orchestration on the other.</p>
+
+    <div class="convo">
+      <div class="msg user">
+        <div class="avatar">AM</div>
+        <div>
+          <div class="by">Alex Martinez · builder · 9:04:00</div>
+          <div class="bub">I need a new 400A underground service to lot 14 at the Willow Ridge subdivision. Meter location per the plat.</div>
+        </div>
+      </div>
+      <div class="msg agent">
+        <div class="avatar">IA</div>
+        <div>
+          <div class="by">Intake Agent · 9:04:04</div>
+          <div class="bub">Got it, Alex. I've confirmed the premise at 2847 Willow Ridge Dr., pulled your builder license (valid through 2028), and verified the plat from the county portal. Routing to qualification now.</div>
+        </div>
+      </div>
+      <div class="msg agent">
+        <div class="avatar">DZ</div>
+        <div>
+          <div class="by">Design-from-Zero Agent · 9:04:46 · internal</div>
+          <div class="bub">Load calc complete (312 A diversified). Nearest primary tap: pole #487321 (142 ft). Route optimized around protected oak cluster. Transformer: existing 50kVA at P#487319 has 34% headroom — no upgrade needed. BOM generated. Confidence: 97.2%.</div>
+        </div>
+      </div>
+      <div class="msg agent">
+        <div class="avatar">CA</div>
+        <div>
+          <div class="by">Contract Agent · 9:06:14</div>
+          <div class="bub">Alex, your quote is ready: $8,420 contribution in aid of construction, $0 monthly until energized. DocuSign sent to alex@willowridge.com. Earliest crew window: Thursday April 16, 7–11 AM.</div>
+        </div>
+      </div>
+      <div class="msg user">
+        <div class="avatar">AM</div>
+        <div>
+          <div class="by">Alex Martinez · 9:06:58</div>
+          <div class="bub">Signed. Thursday works.</div>
+        </div>
+      </div>
+      <div class="msg agent">
+        <div class="avatar">DA</div>
+        <div>
+          <div class="by">Dispatch Agent · 9:07:42 · internal</div>
+          <div class="bub">Crew Blue-7 assigned (lineman Rodriguez + apprentice Chen). Materials pulled from WH-North, loaded 1:30 PM Wednesday. Weather: clear. SLA: 96% confidence on Thursday 7 AM arrival.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== KPI FINALE ============== -->
+<section class="story alt">
+  <div class="wrap reveal">
+    <div class="eyebrow">Outcome</div>
+    <h2>The business impact.</h2>
+    <p class="lede">Projected across 12,000 new-connection requests per year at a mid-sized utility.</p>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="label">Cycle time reduction</div>
+        <div class="num">92%</div>
+        <div class="delta">↓ 47 → 3.8 days</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Annual OpEx savings</div>
+        <div class="num">$18.4M</div>
+        <div class="delta">$1,530 per connection</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Engineering capacity freed</div>
+        <div class="num">41 FTE</div>
+        <div class="delta">redirected to grid-mod</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Customer NPS lift</div>
+        <div class="num">+59</div>
+        <div class="delta">+12 → +71</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Design accuracy</div>
+        <div class="num">97.2%</div>
+        <div class="delta">vs. 82% manual</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Straight-through rate</div>
+        <div class="num">87%</div>
+        <div class="delta">no human touch</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  New Connection Agent · The Story &nbsp;·&nbsp; <a href="pu-agent-console.html" style="color:var(--accent);text-decoration:none;">See the console →</a>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

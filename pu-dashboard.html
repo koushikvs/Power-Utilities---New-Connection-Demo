@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Connection Agent — Operations Intelligence Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f5f5f7;
+      --border: rgba(0,0,0,0.1);
+      --border-h: rgba(0,0,0,0.18);
+      --accent: #0071e3;
+      --accent-2: #0077ed;
+      --good: #0a7a3b;
+      --watch: #c2410c;
+      --red: #b91c1c;
+      --text: #1d1d1f;
+      --text-2: #6e6e73;
+      --text-3: #86868b;
+      --lean: #0071e3;
+      --hybrid: #7c3aed;
+      --agentic: #0a7a3b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "SF Pro Text", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      background: var(--bg); color: var(--text);
+      font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px; height: 44px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+    .hleft { display: flex; align-items: center; gap: 0.7rem; }
+    .brand { font-size: 0.85rem; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
+    .divider { width: 1px; height: 16px; background: var(--border); }
+    .crumb { font-size: 0.75rem; color: var(--text-2); }
+    .nav { display: flex; gap: 0.08rem; }
+    .nav a {
+      font-size: 0.72rem; color: var(--text-3); text-decoration: none;
+      padding: 0.24rem 0.55rem; border-radius: 980px;
+      transition: all 0.2s;
+    }
+    .nav a:hover { color: var(--text); background: rgba(0,0,0,0.05); }
+    .nav a.active { color: var(--accent); background: rgba(0,113,227,0.1); }
+
+    .alert {
+      background: rgba(194,65,12,0.07);
+      border-bottom: 1px solid rgba(194,65,12,0.2);
+      padding: 0.55rem 1.4rem;
+    }
+    .alert-inner {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.8rem; color: #9a3412;
+      max-width: 1440px; margin: 0 auto;
+    }
+    .alert-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--watch); box-shadow: 0 0 8px var(--watch);
+      flex-shrink: 0; animation: blink 1.3s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    .hero {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.3rem 1.4rem 1rem;
+      max-width: 1440px; margin: 0 auto; gap: 1.5rem;
+    }
+    .eyebrow {
+      display: block; font-size: 0.67rem; font-weight: 700;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.3rem;
+    }
+    .hero h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.01em; }
+    .hero-sub { font-size: 0.84rem; color: var(--text-2); margin-top: 0.15rem; }
+    .hero-right { display: flex; gap: 0.7rem; align-items: center; font-size: 0.8rem; color: var(--text-2); }
+    .live {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 12px; border-radius: 980px;
+      background: rgba(10,122,59,0.08); border: 1px solid rgba(10,122,59,0.3);
+      color: var(--good); font-weight: 600; font-size: 11px;
+    }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); animation: blink 1.5s infinite; }
+
+    .grid {
+      max-width: 1440px; margin: 0 auto; padding: 0.5rem 1.4rem 3rem;
+      display: grid; gap: 0.9rem;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.1rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border-h); }
+    .card h3 {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-2);
+      margin-bottom: 0.7rem;
+    }
+
+    /* KPIs */
+    .kpi-row { grid-column: span 12; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.9rem; }
+    .kpi .val { font-size: 1.85rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text); }
+    .kpi .delta { font-size: 0.76rem; margin-top: 0.3rem; color: var(--good); }
+    .kpi .delta.neg { color: var(--watch); }
+    .kpi .ctx { font-size: 0.72rem; color: var(--text-3); margin-top: 0.15rem; }
+
+    /* Layout grouping */
+    .pipe { grid-column: span 8; }
+    .agents { grid-column: span 4; }
+    .perf { grid-column: span 6; }
+    .design { grid-column: span 6; }
+    .feed { grid-column: span 4; }
+    .map { grid-column: span 8; }
+    .sla { grid-column: span 12; }
+
+    /* Pipeline funnel */
+    .pipe-stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+    .pipe-stage {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.8rem 0.7rem; text-align: left;
+      background: var(--panel-2);
+    }
+    .pipe-stage .n { font-size: 1.45rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text); }
+    .pipe-stage .lbl { font-size: 0.72rem; color: var(--text-2); margin-top: 0.15rem; }
+    .pipe-stage .bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 0.6rem; overflow: hidden; }
+    .pipe-stage .fill { height: 100%; }
+    .pipe-stage.intake   .fill { background: var(--agentic); }
+    .pipe-stage.design   .fill { background: var(--agentic); }
+    .pipe-stage.contract .fill { background: var(--hybrid); }
+    .pipe-stage.field    .fill { background: var(--watch); }
+    .pipe-stage.close    .fill { background: var(--lean); }
+
+    /* Agents scorecard */
+    .agent-row {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem;
+      align-items: center;
+      padding: 0.55rem 0; border-top: 1px solid var(--border);
+    }
+    .agent-row:first-of-type { border-top: none; }
+    .agent-row .name { font-size: 0.85rem; font-weight: 500; }
+    .agent-row .sub { font-size: 0.7rem; color: var(--text-3); }
+    .agent-row .tag {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 0.14rem 0.5rem; border-radius: 980px;
+      border: 1px solid;
+    }
+    .agent-row .tag.agentic { color: var(--agentic); background: rgba(10,122,59,0.08); border-color: rgba(10,122,59,0.28); }
+    .agent-row .tag.hybrid  { color: var(--hybrid);  background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.28); }
+    .agent-row .tag.lean    { color: var(--lean);    background: rgba(0,113,227,0.08); border-color: rgba(0,113,227,0.28); }
+    .agent-row .val {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .agent-row .val.good { color: var(--good); }
+    .agent-row .val.watch { color: var(--watch); }
+
+    /* Map / territory */
+    .map-wrap { position: relative; height: 300px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: linear-gradient(135deg, #f0f9f1 0%, #e3efff 100%); }
+    .map-svg { width: 100%; height: 100%; display: block; }
+    .map-pin { cursor: pointer; transition: transform 0.2s; }
+    .map-pin:hover { transform: scale(1.3); }
+    .legend {
+      display: flex; gap: 0.8rem; margin-top: 0.7rem;
+      font-size: 0.72rem; color: var(--text-2);
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Feed */
+    .feed-item {
+      padding: 0.6rem 0; border-top: 1px solid var(--border);
+      display: flex; gap: 0.6rem; align-items: flex-start;
+    }
+    .feed-item:first-of-type { border-top: none; }
+    .feed-ring {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+    }
+    .feed-ring.agentic { background: var(--agentic); }
+    .feed-ring.hybrid  { background: var(--hybrid); }
+    .feed-ring.lean    { background: var(--lean); }
+    .feed-ring.alert   { background: var(--watch); box-shadow: 0 0 8px var(--watch); }
+    .feed-meta { font-size: 0.7rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; margin-bottom: 0.15rem; }
+    .feed-msg { font-size: 0.82rem; line-height: 1.45; }
+
+    /* SLA Risk */
+    .sla-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 0.8rem;
+    }
+    table.sla {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    }
+    table.sla th, table.sla td {
+      padding: 0.6rem 0.7rem; text-align: left; border-top: 1px solid var(--border);
+    }
+    table.sla th {
+      font-size: 0.68rem; color: var(--text-3); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      border-top: none;
+    }
+    .chip {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.55rem; border-radius: 980px;
+      border: 1px solid;
+    }
+    .chip.green  { color: var(--good);  background: rgba(10,122,59,0.08);  border-color: rgba(10,122,59,0.28); }
+    .chip.yellow { color: #a16207;      background: rgba(202,138,4,0.08);  border-color: rgba(202,138,4,0.3); }
+    .chip.red    { color: var(--red);   background: rgba(185,28,28,0.08);  border-color: rgba(185,28,28,0.28); }
+
+    .chart-wrap { height: 210px; position: relative; }
+
+    @media (max-width: 1100px) {
+      .kpi-row { grid-template-columns: repeat(3, 1fr); }
+      .pipe, .map, .sla { grid-column: span 12; }
+      .agents, .perf, .design, .feed { grid-column: span 12; }
+      .pipe-stages { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hleft">
+    <a class="brand" href="index.html">⚡ New Connection Agent</a>
+    <span class="divider"></span>
+    <span class="crumb">Operations Intelligence</span>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="pu-story.html">Story</a>
+    <a href="pu-agent-console.html">Console</a>
+    <a href="pu-dashboard.html" class="active">Dashboard</a>
+  </nav>
+</header>
+
+<div class="alert">
+  <div class="alert-inner">
+    <span class="alert-dot"></span>
+    <strong>3 connections at SLA risk</strong> &nbsp;·&nbsp; Storm forecast affecting North territory crew capacity Apr 16 · Dispatch Agent rebalancing automatically
+    <span style="margin-left:auto;color:var(--text-3);font-size:0.74rem;">Updated 09:42 UTC · Auto-refresh 30s</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div>
+    <span class="eyebrow">Live · Tuesday, April 14, 2026</span>
+    <h1>New Connection Ops — Agentic Control Tower</h1>
+    <div class="hero-sub">847 in-flight connections · 7 systems · 10 agents · service territory view</div>
+  </div>
+  <div class="hero-right">
+    <span class="live"><span class="live-dot"></span>LIVE</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="card kpi">
+      <h3>Active pipeline</h3>
+      <div class="val">847</div>
+      <div class="delta">↑ 12% WoW</div>
+      <div class="ctx">Open connections across all stages</div>
+    </div>
+    <div class="card kpi">
+      <h3>Avg cycle time</h3>
+      <div class="val">3.8 d</div>
+      <div class="delta">↓ 92% vs legacy (47 d)</div>
+      <div class="ctx">Rolling 30-day average</div>
+    </div>
+    <div class="card kpi">
+      <h3>Straight-through rate</h3>
+      <div class="val">87.3%</div>
+      <div class="delta">↑ 2.1 pp WoW</div>
+      <div class="ctx">No human touch required</div>
+    </div>
+    <div class="card kpi">
+      <h3>Design-from-Zero</h3>
+      <div class="val" style="color:var(--agentic);">94.1%</div>
+      <div class="delta">avg confidence</div>
+      <div class="ctx">Auto-approve threshold: 90%</div>
+    </div>
+    <div class="card kpi">
+      <h3>Human touchpoints</h3>
+      <div class="val">1.4</div>
+      <div class="delta">↓ from 23 legacy</div>
+      <div class="ctx">Avg per connection</div>
+    </div>
+    <div class="card kpi">
+      <h3>OpEx savings (MTD)</h3>
+      <div class="val">$1.42M</div>
+      <div class="delta">on pace for $18.4M/yr</div>
+      <div class="ctx">vs. legacy baseline</div>
+    </div>
+  </div>
+
+  <!-- PIPELINE FUNNEL -->
+  <div class="card pipe">
+    <h3>Pipeline by Stage · Live</h3>
+    <div class="pipe-stages">
+      <div class="pipe-stage intake"><div class="n">184</div><div class="lbl">Intake &amp; Qualification</div><div class="bar"><div class="fill" style="width:95%"></div></div></div>
+      <div class="pipe-stage design"><div class="n">127</div><div class="lbl">Design &amp; Estimation</div><div class="bar"><div class="fill" style="width:78%"></div></div></div>
+      <div class="pipe-stage contract"><div class="n">96</div><div class="lbl">Contract &amp; Payment</div><div class="bar"><div class="fill" style="width:62%"></div></div></div>
+      <div class="pipe-stage field"><div class="n">312</div><div class="lbl">Construction / Field</div><div class="bar"><div class="fill" style="width:88%"></div></div></div>
+      <div class="pipe-stage close"><div class="n">128</div><div class="lbl">Completion &amp; Closeout</div><div class="bar"><div class="fill" style="width:70%"></div></div></div>
+    </div>
+    <div style="margin-top:1rem;font-size:0.78rem;color:var(--text-2);">
+      <strong style="color:var(--text);">Bottleneck alert:</strong> Field stage holding 312 — 38 awaiting long-lead materials (commercial). Construction Orchestrator rebalancing.
+    </div>
+  </div>
+
+  <!-- AGENT SCORECARD -->
+  <div class="card agents">
+    <h3>Agent Scorecard · Last 24h</h3>
+    <div class="agent-row">
+      <div><div class="name">Intake Agent</div><div class="sub">1,284 requests processed</div></div>
+      <div class="tag agentic">Agentic</div>
+      <div class="val good">99.2%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">Qualification Agent</div><div class="sub">1,201 opps created</div></div>
+      <div class="tag agentic">Agentic</div>
+      <div class="val good">98.7%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">Design-from-Zero</div><div class="sub">184 designs · 11 escalated</div></div>
+      <div class="tag agentic">Agentic</div>
+      <div class="val good">94.0%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">Contract Agent</div><div class="sub">96 BMDs · 94 signed</div></div>
+      <div class="tag hybrid">Hybrid</div>
+      <div class="val good">97.9%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">Dispatch Agent</div><div class="sub">312 crew days optimized</div></div>
+      <div class="tag agentic">Agentic</div>
+      <div class="val watch">91.2%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">Field Closeout</div><div class="sub">128 as-builts validated</div></div>
+      <div class="tag hybrid">Hybrid</div>
+      <div class="val good">96.1%</div>
+    </div>
+    <div class="agent-row">
+      <div><div class="name">GIS Sync (Lean Core)</div><div class="sub">128 TMD updates · 0 drift</div></div>
+      <div class="tag lean">Lean</div>
+      <div class="val good">100%</div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE CHART -->
+  <div class="card perf">
+    <h3>Cycle Time — Legacy vs. Reimagined (days)</h3>
+    <div class="chart-wrap"><canvas id="chartCycle"></canvas></div>
+  </div>
+
+  <!-- DESIGN-FROM-ZERO -->
+  <div class="card design">
+    <h3>Design-from-Zero · Confidence Distribution (last 30d)</h3>
+    <div class="chart-wrap"><canvas id="chartConf"></canvas></div>
+    <div style="margin-top:0.6rem;font-size:0.76rem;color:var(--text-2);">
+      <strong style="color:var(--text);">89.3%</strong> of designs auto-approved (≥90% confidence). Remaining 10.7% routed to senior engineers — avg review time 14 min.
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="card map">
+    <h3>Service Territory · In-Flight Connections</h3>
+    <div class="map-wrap">
+      <svg class="map-svg" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- stylized territory -->
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="800" height="300" fill="url(#grid)" />
+        <!-- coastline / regions -->
+        <path d="M 0 220 Q 100 200 180 210 T 340 190 T 520 200 T 700 180 T 800 190 L 800 300 L 0 300 Z"
+              fill="rgba(46,125,50,0.08)" stroke="rgba(46,125,50,0.3)" stroke-width="1"/>
+        <path d="M 0 120 Q 140 100 280 115 T 560 105 T 800 100 L 800 0 L 0 0 Z"
+              fill="rgba(0,113,227,0.05)" stroke="rgba(0,113,227,0.2)" stroke-width="1"/>
+
+        <!-- Region labels -->
+        <text x="120" y="60"  fill="#6e6e73" font-size="11" font-family="SF Pro Text">NORTH TERRITORY</text>
+        <text x="380" y="160" fill="#6e6e73" font-size="11" font-family="SF Pro Text">CENTRAL</text>
+        <text x="620" y="255" fill="#6e6e73" font-size="11" font-family="SF Pro Text">SOUTH COAST</text>
+
+        <!-- Pins (agentic=green, hybrid=purple, lean=blue, alert=orange) -->
+        <g class="map-pin"><circle cx="140" cy="90" r="8" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="210" cy="110" r="6" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="180" cy="130" r="7" fill="rgba(124,58,237,0.85)"/></g>
+        <g class="map-pin"><circle cx="250" cy="75" r="9" fill="rgba(194,65,12,0.9)"/></g>
+        <g class="map-pin"><circle cx="310" cy="105" r="6" fill="rgba(0,113,227,0.85)"/></g>
+        <g class="map-pin"><circle cx="360" cy="140" r="8" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="420" cy="175" r="7" fill="rgba(124,58,237,0.85)"/></g>
+        <g class="map-pin"><circle cx="390" cy="200" r="6" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="470" cy="160" r="9" fill="rgba(0,113,227,0.85)"/></g>
+        <g class="map-pin"><circle cx="510" cy="130" r="7" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="560" cy="180" r="8" fill="rgba(124,58,237,0.85)"/></g>
+        <g class="map-pin"><circle cx="600" cy="230" r="9" fill="rgba(10,122,59,0.85)"/></g>
+        <g class="map-pin"><circle cx="660" cy="245" r="7" fill="rgba(194,65,12,0.9)"/></g>
+        <g class="map-pin"><circle cx="720" cy="225" r="6" fill="rgba(0,113,227,0.85)"/></g>
+        <g class="map-pin"><circle cx="680" cy="200" r="8" fill="rgba(10,122,59,0.85)"/></g>
+
+        <!-- Storm cell marker on North -->
+        <g>
+          <circle cx="245" cy="75" r="35" fill="rgba(194,65,12,0.08)" stroke="rgba(194,65,12,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="275" y="55" fill="#c2410c" font-size="10" font-family="SF Pro Text" font-weight="600">⛈ Storm cell</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--agentic);"></span>Agentic stage</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--hybrid);"></span>Hybrid stage</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--lean);"></span>Lean Core stage</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--watch);"></span>At SLA risk</div>
+    </div>
+  </div>
+
+  <!-- LIVE FEED -->
+  <div class="card feed">
+    <h3>Live Event Feed</h3>
+    <div class="feed-item">
+      <span class="feed-ring agentic"></span>
+      <div><div class="feed-meta">09:41:58 · Design-from-Zero</div><div class="feed-msg">OPP-4851 auto-approved at 96.4% confidence · residential 200A</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring alert"></span>
+      <div><div class="feed-meta">09:41:12 · Dispatch Agent</div><div class="feed-msg">Rebalancing 14 crew days in North territory — storm cell T-24h</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring hybrid"></span>
+      <div><div class="feed-meta">09:40:03 · Contract Agent</div><div class="feed-msg">DocuSign signed · OPP-4833 · $12,480 CIAC captured</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring lean"></span>
+      <div><div class="feed-meta">09:39:41 · GIS Sync</div><div class="feed-msg">128th TMD update of the day · OPP-4712 closed · 0 drift</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring agentic"></span>
+      <div><div class="feed-meta">09:38:24 · Intake Agent</div><div class="feed-msg">New request from Parkside Dev · 3-phase 600A commercial</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring hybrid"></span>
+      <div><div class="feed-meta">09:37:02 · Field Closeout</div><div class="feed-msg">As-built validated · OPP-4788 · meter MTR-99271 activated</div></div>
+    </div>
+    <div class="feed-item">
+      <span class="feed-ring agentic"></span>
+      <div><div class="feed-meta">09:36:15 · Design-from-Zero</div><div class="feed-msg">⚠ OPP-4849 routed to engineer · 73% confidence · wetland conflict</div></div>
+    </div>
+  </div>
+
+  <!-- SLA RISK TABLE -->
+  <div class="card sla">
+    <div class="sla-header">
+      <h3 style="margin:0;">SLA Risk — Top At-Risk Connections</h3>
+      <span style="font-size:0.74rem;color:var(--text-3);">Scored by Dispatch + Construction agents · Rolling</span>
+    </div>
+    <table class="sla">
+      <thead>
+        <tr>
+          <th>Opp ID</th>
+          <th>Customer / Premise</th>
+          <th>Stage</th>
+          <th>Layer</th>
+          <th>Commit Date</th>
+          <th>Delay Risk</th>
+          <th>Root Cause</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OPP-4849</strong></td>
+          <td>BrightLogix Mfg · 1 MW</td>
+          <td>Design &amp; Estimation</td>
+          <td><span class="chip" style="color:var(--agentic);background:rgba(10,122,59,0.08);border:1px solid rgba(10,122,59,0.28);">Agentic</span></td>
+          <td>Jun 02</td>
+          <td><span class="chip red">High · 68%</span></td>
+          <td>Wetland ROW conflict · awaiting engineer</td>
+          <td>Assigned to J. Okafor · ETA 14 min</td>
+        </tr>
+        <tr>
+          <td><strong>OPP-4802</strong></td>
+          <td>Willow Ridge Lot 22</td>
+          <td>Construction / Field</td>
+          <td><span class="chip" style="color:var(--watch);background:rgba(194,65,12,0.08);border:1px solid rgba(194,65,12,0.28);">Hybrid</span></td>
+          <td>Apr 16</td>
+          <td><span class="chip yellow">Med · 42%</span></td>
+          <td>Storm forecast · North territory crew impact</td>
+          <td>Dispatch rebalancing to Blue-4</td>
+        </tr>
+        <tr>
+          <td><strong>OPP-4744</strong></td>
+          <td>Harbor Point Condos</td>
+          <td>Contract &amp; Payment</td>
+          <td><span class="chip" style="color:var(--hybrid);background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.28);">Hybrid</span></td>
+          <td>May 03</td>
+          <td><span class="chip yellow">Med · 38%</span></td>
+          <td>Awaiting CFO signature 3d</td>
+          <td>Reminder sent · escalate to VP in 24h</td>
+        </tr>
+        <tr>
+          <td><strong>OPP-4721</strong></td>
+          <td>Northgate Industrial Park</td>
+          <td>Construction / Field</td>
+          <td><span class="chip" style="color:var(--watch);background:rgba(194,65,12,0.08);border:1px solid rgba(194,65,12,0.28);">Hybrid</span></td>
+          <td>Apr 21</td>
+          <td><span class="chip green">Low · 14%</span></td>
+          <td>Pad-mount transformer long-lead</td>
+          <td>ETA confirmed · on schedule</td>
+        </tr>
+        <tr>
+          <td><strong>OPP-4688</strong></td>
+          <td>Oakridge Elementary (expansion)</td>
+          <td>Completion &amp; Closeout</td>
+          <td><span class="chip" style="color:var(--lean);background:rgba(0,113,227,0.08);border:1px solid rgba(0,113,227,0.28);">Lean</span></td>
+          <td>Apr 14</td>
+          <td><span class="chip green">On track</span></td>
+          <td>GIS sync queued</td>
+          <td>Auto-close in 2h</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // Cycle time comparison
+  const ctx1 = document.getElementById('chartCycle').getContext('2d');
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: ['Intake', 'Design', 'Contract', 'Payment', 'Construct', 'Close'],
+      datasets: [
+        { label:'Legacy (days)',     data:[2, 9, 6, 4, 18, 8], backgroundColor:'rgba(194,65,12,0.65)', borderRadius:4 },
+        { label:'Reimagined (days)', data:[0.02, 0.04, 0.6, 0.05, 2.8, 0.3], backgroundColor:'rgba(10,122,59,0.85)', borderRadius:4 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'bottom', labels: { color:'#6e6e73', font:{ size:11 } } },
+        tooltip: { callbacks:{ label:c => `${c.dataset.label}: ${c.raw} d` } },
+      },
+      scales: {
+        x: { grid: { display:false }, ticks: { color:'#6e6e73' } },
+        y: { grid: { color:'rgba(0,0,0,0.05)' }, ticks: { color:'#6e6e73' }, title:{ display:true, text:'Days', color:'#6e6e73' } },
+      },
+    },
+  });
+
+  // Confidence distribution
+  const ctx2 = document.getElementById('chartConf').getContext('2d');
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ['<60%', '60-70%', '70-80%', '80-90%', '90-95%', '95-100%'],
+      datasets: [{
+        label: 'Design count',
+        data: [8, 24, 62, 148, 412, 896],
+        backgroundColor: [
+          'rgba(185,28,28,0.75)',
+          'rgba(194,65,12,0.75)',
+          'rgba(202,138,4,0.75)',
+          'rgba(124,58,237,0.75)',
+          'rgba(10,122,59,0.75)',
+          'rgba(10,122,59,0.95)',
+        ],
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false } },
+      scales: {
+        x: { grid: { display:false }, ticks: { color:'#6e6e73' }, title:{ display:true, text:'Confidence band', color:'#6e6e73', font:{ size:10 } } },
+        y: { grid: { color:'rgba(0,0,0,0.05)' }, ticks: { color:'#6e6e73' } },
+      },
+    },
+  });
+</script>
+</body>
+</html>
