@@ -294,7 +294,10 @@
   </div>
   <div class="hactions">
     <div class="status"><span class="pulse"></span> Agents online · 7 systems</div>
-    <a href="index.html" class="exit">← Exit</a>
+    <a href="pu-story.html" class="exit">Story</a>
+    <a href="pu-dashboard.html" class="exit">Dashboard</a>
+    <a href="pu-faq.html" class="exit">FAQ</a>
+    <a href="index.html" class="exit">← Home</a>
   </div>
 </header>
 
@@ -436,7 +439,7 @@
         <div class="dec-sub">Legacy equivalent: 18–23</div>
       </div>
       <div class="dec-card">
-        <div class="dec-label">Design confidence</div>
+        <div class="dec-label">Design completeness check</div>
         <div class="dec-val" id="kConf">—</div>
         <div class="dec-sub" id="kConfSub">Design-from-Zero not yet run</div>
       </div>
@@ -466,15 +469,15 @@
   // The cycle time KPI always shows wall-clock DAYS, never the sim-seconds value.
 
   const SCENARIO_META = {
-    residential: { targetDays: 11, legacyDays: 47, reduction: '77%',
-                   legacyLabel: 'Legacy baseline: 47 days · Target: ~11 days' },
-    commercial:  { targetDays: 42, legacyDays: 94, reduction: '55%',
-                   legacyLabel: 'Legacy baseline: 94 days · Target: ~42 days' },
+    residential: { targetDays: 19, legacyDays: 47, reduction: '60%',
+                   legacyLabel: 'Legacy baseline: 47 days · Target: ~19 days' },
+    commercial:  { targetDays: 46, legacyDays: 94, reduction: '51%',
+                   legacyLabel: 'Legacy baseline: 94 days · Target: ~46 days' },
   };
 
   const SCENARIOS = {
     residential: [
-      // ── DAY 1: Intake → Design draft ──────────────────────────────────────
+      // ── DAY 1: Intake → Qualify → Premise ─────────────────────────────────
       { t:0.0,  wall:'Day 1 · 09:04', step:'intake',  agent:'Intake Agent', badge:'agentic',
         msg:'Request received: Alex Martinez, 400A underground service at Willow Ridge Lot 14.', tools:['dig'] },
       { t:1.3,  wall:'Day 1 · 09:06', step:'intake',  agent:'Intake Agent', badge:'agentic',
@@ -483,44 +486,51 @@
         msg:'OPP-4827 created in CCM. Tariff: RES-D. Soft credit: pass. Service territory eligibility confirmed.', tools:['ccm'] },
       { t:4.2,  wall:'Day 1 · 09:28', step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid',
         msg:'TMD pulled from GIS; reconciled with WAM asset record for transformer P#487319. Delta 0.4% — auto-accepted.', tools:['gis','wam'] },
+      // ── DAY 1: Design — with stale-data recovery ───────────────────────────
       { t:6.2,  wall:'Day 1 · 09:46', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
-        msg:'Draft design generated in 18 min. Load: 312 A diversified. Route: 142 ft from tap P#487321. Existing 50 kVA xfmr has 34% headroom — no upgrade needed.', tools:['gis','wam','ml'] },
+        msg:'Draft design initiated. Load calc: 312 A diversified. Route: 142 ft from tap P#487321. Querying transformer headroom on P#487319.', tools:['gis','wam','ml'] },
       { t:7.8,  wall:'Day 1 · 09:47', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
-        msg:'BOM generated. Draft confidence: 97.2%. Residential scope eligible for engineer review (not auto-stamp — PE seal required by state code). Package submitted to PE review queue. Estimated stamp: 1–2 business days.', tools:['gis','wam','ml'], conf:97.2 },
-      // ── DAY 2: PE review — comment raised ─────────────────────────────────
-      { t:9.4,  wall:'Day 2 · 08:30', step:'design',  agent:'PE Review Queue', badge:'hybrid',
+        msg:'⚠ Data conflict detected: GIS transformer record P#487319 last updated 14 months ago — capacity figure conflicts with WAM maintenance log entry from 3 months prior. Triggering WAM–GIS re-sync automatically. Design paused pending resolution.', tools:['gis','wam'] },
+      { t:9.4,  wall:'Day 1 · 10:26', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
+        msg:'WAM–GIS re-sync complete (38 min). Transformer capacity confirmed: 50 kVA with 34% headroom — no upgrade needed. Design generation resumed. No human intervention required.', tools:['gis','wam'] },
+      { t:11.0, wall:'Day 1 · 10:44', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
+        msg:'Draft complete. BOM generated. Package completeness check: passed all 22 criteria. Confidence score 97.2% retained as internal diagnostic — not a decision gate. Submitted to PE J. Okafor review queue. PE must conduct full independent review per state licensing code.', tools:['gis','wam','ml'], conf:97.2 },
+      // ── DAY 2: PE review — genuine, documented review with comment ──────────
+      { t:12.5, wall:'Day 2 · 08:30', step:'design',  agent:'PE Review Queue', badge:'hybrid',
         msg:'Design entered PE J. Okafor\'s queue. 7 residential packages ahead. Expected review slot: this afternoon.', tools:[] },
-      { t:10.9, wall:'Day 2 · 14:15', step:'design',  agent:'PE J. Okafor (comment)', badge:'user', human:true,
-        msg:'One comment raised: conduit fill notation on Sheet 3 must explicitly reference NEC 310.15(B) fill table for inspector compliance. Agent notified for revision.', tools:[] },
-      { t:12.2, wall:'Day 2 · 14:32', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
-        msg:'Comment addressed: Sheet 3 updated with NEC 310.15(B) table reference and recalculated fill ratio (38% — within 40% limit). Revised package resubmitted to PE.', tools:['gis','wam'] },
-      // ── DAY 3: PE stamps, contract sent ───────────────────────────────────
-      { t:13.8, wall:'Day 3 · 10:05', step:'design',  agent:'PE J. Okafor (final stamp)', badge:'user', human:true,
-        msg:'Revision reviewed and accepted. Drawings electronically stamped and sealed. Total PE engagement: ~55 min across 1.5 business days (queue + review + revision check).', tools:[] },
-      { t:15.4, wall:'Day 3 · 14:30', step:'contract', agent:'Contract Agent', badge:'hybrid',
-        msg:'Stamped BMD drafted: $8,420 CIAC, $0/mo until energized. DocuSign envelope sent to alex@willowridge.com. 2-business-day signature window included.', tools:['isu','ds'] },
+      { t:13.8, wall:'Day 2 · 14:15', step:'design',  agent:'PE J. Okafor (review — comment raised)', badge:'user', human:true,
+        msg:'Full design review in progress: load calc verified, route clearances checked, transformer capacity confirmed. One comment: conduit fill notation on Sheet 3 must cite NEC 310.15(B) fill table explicitly for field inspector. Agent notified for revision. PE logs review attestation per state licensing board requirements.', tools:[] },
+      { t:15.0, wall:'Day 2 · 14:32', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
+        msg:'Comment addressed: Sheet 3 updated with NEC 310.15(B) table reference, recalculated fill ratio (38% — within 40% limit). Revision summary included for PE re-review. Resubmitted.', tools:['gis','wam'] },
+      // ── DAY 3: PE stamps with full attestation ─────────────────────────────
+      { t:16.5, wall:'Day 3 · 10:05', step:'design',  agent:'PE J. Okafor (stamp — full attestation)', badge:'user', human:true,
+        msg:'Revision accepted. PE completed full review of revised package (load calcs, conductor sizing, NEC compliance, route clearances). Electronic stamp and seal applied with documented attestation. Total PE engagement: ~2.5 hrs across 1.5 business days. PE retains full professional liability per state code.', tools:[] },
+      // ── DAY 3: Contract drafted and sent ──────────────────────────────────
+      { t:18.0, wall:'Day 3 · 14:30', step:'contract', agent:'Contract Agent', badge:'hybrid',
+        msg:'Stamped BMD drafted: $8,420 CIAC ($310 new OpEx vs. $1,840 legacy). DocuSign sent to alex@willowridge.com. 2-business-day review window included.', tools:['isu','ds'] },
       // ── DAY 5: Customer signs, payment, CO ────────────────────────────────
-      { t:17.2, wall:'Day 5 · 08:22', step:'contract', agent:'Alex Martinez', badge:'user', human:true,
+      { t:20.0, wall:'Day 5 · 08:22', step:'contract', agent:'Alex Martinez', badge:'user', human:true,
         msg:'Customer signed after 2-day review period. Scheduling window chosen: crew dispatch within 5 business days.', tools:['ds'] },
-      { t:18.6, wall:'Day 5 · 08:24', step:'payment',  agent:'Payment Orchestration (Lean Core)', badge:'lean',
+      { t:21.3, wall:'Day 5 · 08:24', step:'payment',  agent:'Payment Orchestration (Lean Core)', badge:'lean',
         msg:'Invoice posted to SAP ISU. $8,420 captured via ACH. Escrow held pending energization.', tools:['isu'] },
-      { t:20.0, wall:'Day 5 · 08:30', step:'construction', agent:'Construction Order Release', badge:'lean',
+      { t:22.6, wall:'Day 5 · 08:30', step:'construction', agent:'Construction Order Release', badge:'lean',
         msg:'CO-338412 released. All materials confirmed in-stock at WH-North — no long-lead items. Work order propagated to warehouse and scheduling.', tools:['isu','wam'] },
-      { t:21.5, wall:'Day 5 · 10:15', step:'dispatch', agent:'Dispatch Agent', badge:'agentic',
-        msg:'Schedule optimized: weather clear Days 9–12, Crew Blue-7 available. Assigned to Day 11 URD slot in Willow Ridge zone. Materials staged for Day 10 pick-up.', tools:['sfs'] },
-      // ── DAY 11: Field execution ────────────────────────────────────────────
-      { t:23.5, wall:'Day 11 · 07:14', step:'field',   agent:'Field Closeout Agent', badge:'hybrid',
+      // ── DAY 5: Dispatch — realistic crew backlog ───────────────────────────
+      { t:24.0, wall:'Day 5 · 10:15', step:'dispatch', agent:'Dispatch Agent', badge:'agentic',
+        msg:'Territory crew queue: 6 URD crews active, 14 connections ahead in Willow Ridge zone. Earliest available slot: Day 19. Union rest-period and crew certification rules applied. Crew Blue-7 assigned. Materials staged Day 18. Weather window confirmed clear.', tools:['sfs'] },
+      // ── DAY 19: Field execution ────────────────────────────────────────────
+      { t:26.5, wall:'Day 19 · 07:14', step:'field',   agent:'Field Closeout Agent', badge:'hybrid',
         msg:'Crew Blue-7 on site. Trench (142 ft), conductor pull, and meter set completed in one visit (5.5 hr). Foreman safety sign-off captured in SFS.', tools:['sfs'] },
-      { t:25.2, wall:'Day 11 · 13:48', step:'field',   agent:'Field Closeout Agent', badge:'hybrid', human:true,
-        msg:'As-built photos captured. AI vision validated meter install, grounding electrode, trench depth, and conductor clearance. 1 QA flag (label orientation) routed to supervisor — resolved in 18 min.', tools:['sfs'] },
-      { t:27.0, wall:'Day 11 · 15:05', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
+      { t:28.2, wall:'Day 19 · 13:48', step:'field',   agent:'Field Closeout Agent', badge:'hybrid', human:true,
+        msg:'As-built photos captured. AI vision validated meter install, grounding electrode, trench depth, conductor clearances. 1 QA flag (conduit label orientation) — resolved by supervisor in 18 min.', tools:['sfs'] },
+      { t:30.0, wall:'Day 19 · 15:05', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
         msg:'TMD updated in GIS with as-built geometry. Meter MTR-99284 activated in SAP ISU. OPP-4827 closed. First bill cycle started.', tools:['gis','isu'] },
-      { t:28.5, wall:'Day 11 · 15:06', step:'sync',    agent:'System', badge:'success',
-        msg:'End-to-end complete. Human touchpoints: 5 (PE comment + final stamp, customer signature, QA flag, crew safety sign-off). Cycle time: 11 business days vs. 47-day legacy — 77% reduction. Savings are in queue time, document chasing, and handoffs — not field compression.', tools:[] },
+      { t:31.5, wall:'Day 19 · 15:06', step:'sync',    agent:'System', badge:'success',
+        msg:'End-to-end complete. Human touchpoints: 5 (PE review + comment + stamp, customer signature, QA flag, crew safety sign-off). Cycle time: 19 business days vs. 47-day legacy — 60% reduction. Savings from eliminating queue time, stale-data delays, and coordination handoffs — not field execution. PE liability model unchanged.', tools:[] },
     ],
 
     commercial: [
-      // ── DAY 1: Intake → Design draft ──────────────────────────────────────
+      // ── DAY 1: Intake ──────────────────────────────────────────────────────
       { t:0.0,  wall:'Day 1 · 09:00', step:'intake',  agent:'Intake Agent', badge:'agentic',
         msg:'Request received: BrightLogix Manufacturing, 1 MW 3-phase service, new warehouse at 1400 Industrial Pkwy.', tools:['dig'] },
       { t:1.8,  wall:'Day 1 · 09:02', step:'intake',  agent:'Intake Agent', badge:'agentic',
@@ -529,48 +539,55 @@
         msg:'Clarified peak demand schedule and motor start profile. Updated load sheet uploaded.', tools:['dig'] },
       { t:4.5,  wall:'Day 1 · 14:35', step:'qualify', agent:'Qualification Agent', badge:'agentic',
         msg:'OPP-4828 created. Tariff: GS-3 (large commercial). Credit: A-rated. Zoning compliant. Interconnection class confirmed.', tools:['ccm'] },
-      { t:6.2,  wall:'Day 1 · 14:50', step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid',
+      // ── DSIS filed Day 1 — parallel track ─────────────────────────────────
+      { t:5.5,  wall:'Day 1 · 14:38', step:'qualify', agent:'Regulatory Coordination Agent', badge:'hybrid',
+        msg:'⚡ Distribution System Impact Study (DSIS) initiated: 1 MW load is above state PUC threshold — formal DSIS required before energization. Filed with grid planning on Day 1. Runs in parallel with design, contracting, and construction. Estimated regulatory window: 45–55 business days. Legacy process filed DSIS after design approval (Day 9+) — parallel initiation saves 8–12 days.', tools:['ccm'] },
+      { t:6.8,  wall:'Day 1 · 14:50', step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid',
         msg:'TMD reconciled. GIS shows nearest 3-phase primary 880 ft away. WAM substation capacity confirmed: 62% headroom — adequate.', tools:['gis','wam'] },
-      { t:8.2,  wall:'Day 1 · 15:18', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
+      // ── DAY 1: Design ──────────────────────────────────────────────────────
+      { t:8.5,  wall:'Day 1 · 15:18', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
         msg:'Draft generated in 28 min. Load: 1.04 MVA. Route: 880 ft run + new 500 kVA pad-mount xfmr. Substation headroom: 62% — OK.', tools:['gis','wam','ml'] },
       { t:10.5, wall:'Day 1 · 15:20', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
-        msg:'⚠ Route conflict: proposed ROW crosses a wetland setback polygon. Two alternates auto-generated. Confidence: 71% — below 90% auto-approve threshold. Escalating to Sr. Engineer review queue. Estimated review window: 3–5 business days.', tools:['gis','ml'], conf:71, alert:true },
-      // ── DAY 2–4: Sr. Engineer review (site walk required) ─────────────────
+        msg:'⚠ Route conflict: proposed ROW crosses wetland setback polygon. Two alternates generated. Internal confidence score: 71% — below completeness threshold. Escalating to Sr. Engineer review queue. Est. review: 3–5 business days.', tools:['gis','ml'], conf:71, alert:true },
+      // ── DAY 2–4: Engineer review with site walk ────────────────────────────
       { t:12.2, wall:'Day 2 · 09:00', step:'design',  agent:'Sr. Engineer (J. Okafor)', badge:'user', human:true,
-        msg:'Package entered Sr. Engineer review. Wetland polygon confirmed as regulated — both alternates require site walk before override can be logged. Walk booked for Day 3 AM.', tools:[] },
+        msg:'Package entered Sr. Engineer review. Wetland polygon confirmed as regulated under state environmental code — both alternates require site walk before override can be logged. Site walk scheduled Day 3 AM.', tools:[] },
       { t:13.8, wall:'Day 3 · 13:30', step:'design',  agent:'Sr. Engineer (J. Okafor)', badge:'user', human:true,
-        msg:'Site walk complete. Wetland boundary confirmed at survey stakes. Alternate B (west corridor, +210 ft) viable — easement confirmed with property owner. Override logged. Agent authorized to re-optimize on Alternate B.', tools:[] },
+        msg:'Site walk complete. Alternate B (west corridor, +210 ft) viable — easement confirmed, no additional environmental permits required. Override logged with site walk photos and notes attached. Agent authorized to re-optimize.', tools:[] },
       { t:15.5, wall:'Day 4 · 10:30', step:'design',  agent:'Design-from-Zero Agent', badge:'agentic',
-        msg:'Design re-optimized on Alternate B. Updated BOM: 1,090 ft total URD, 500 kVA pad-mount xfmr. Final confidence: 94.8%. PE stamp applied by J. Okafor.', tools:['gis','wam','ml'], conf:94.8 },
-      // ── DAY 5: Contract drafted ────────────────────────────────────────────
+        msg:'Design re-optimized on Alternate B. Updated BOM: 1,090 ft total URD, 500 kVA pad-mount xfmr. Completeness score: 94.8%. Full PE review conducted by J. Okafor (2.5 hrs) — stamp applied. PE liability: unchanged from standard practice.', tools:['gis','wam','ml'], conf:94.8 },
+      // ── DAY 5: Contract ────────────────────────────────────────────────────
       { t:17.5, wall:'Day 5 · 10:00', step:'contract', agent:'Contract Agent', badge:'hybrid',
-        msg:'Commercial BMD drafted: $214,800 CIAC + $4,200/mo demand charge. DocuSign sent to CFO and facilities lead. 4-business-day window for internal legal review.', tools:['isu','ds'] },
-      // ── DAY 7: Legal redline ───────────────────────────────────────────────
+        msg:'Commercial BMD drafted: $214,800 CIAC + $4,200/mo demand charge. DocuSign sent to CFO and facilities lead. 4-business-day window for internal legal review. Note: energization date contingent on DSIS clearance (est. Day 46–56).', tools:['isu','ds'] },
+      // ── DAY 7: Legal redline ──────────────────────────────────────────────
       { t:19.5, wall:'Day 7 · 14:00', step:'contract', agent:'BrightLogix (Legal)', badge:'user', human:true,
-        msg:'Internal legal review complete. One redline on indemnification clause (liability cap language) — minor, accepted by utility standard rider. Contract updated in DocuSign.', tools:['ds'] },
+        msg:'Internal legal review complete. One redline: indemnification liability cap language — minor, accepted under utility standard rider. Contract updated in DocuSign.', tools:['ds'] },
       // ── DAY 9: CFO signs ──────────────────────────────────────────────────
       { t:21.5, wall:'Day 9 · 10:42', step:'contract', agent:'BrightLogix (CFO)', badge:'user', human:true,
-        msg:'Contract signed by CFO after 4-day review period. Target energize: Day 55.', tools:['ds'] },
+        msg:'Contract signed after 4-day review. Target energization: Day 48 (contingent on DSIS clearance). $214,800 CIAC accepted.', tools:['ds'] },
       { t:23.0, wall:'Day 9 · 10:45', step:'payment',  agent:'Payment Orchestration (Lean Core)', badge:'lean',
-        msg:'ACH wire received: $214,800. Escrow set. SAP ISU billing profile activated.', tools:['isu'] },
+        msg:'ACH wire received: $214,800. Escrow held until DSIS clearance received and meter activated. ISU billing profile created.', tools:['isu'] },
       { t:24.5, wall:'Day 9 · 11:15', step:'construction', agent:'Construction Order Release', badge:'lean',
-        msg:'CO-338601 released. ⚠ Long-lead item: 500 kVA pad-mount transformer — 28-business-day vendor lead time. Procurement order placed immediately to minimize wait.', tools:['isu','wam'] },
-      // ── DAY 10: Dispatch plan ─────────────────────────────────────────────
+        msg:'CO-338601 released. ⚠ Long-lead: 500 kVA pad-mount transformer — 28-business-day vendor lead. Procurement placed immediately. DSIS continues on parallel track.', tools:['isu','wam'] },
+      // ── DAY 10: Dispatch ──────────────────────────────────────────────────
       { t:26.0, wall:'Day 10 · 09:00', step:'dispatch', agent:'Dispatch Agent', badge:'agentic',
-        msg:'Multi-phase crew plan built around transformer ETA (Day 37): trenching Days 12–13, cable pull Day 14, transformer set Day 38, commissioning Day 41. Two-day weather buffer included.', tools:['sfs'] },
+        msg:'Multi-phase crew plan: trenching Days 12–13, cable pull Day 14, transformer set Day 38, commissioning Day 43. DSIS clearance expected ~Day 46 — 3-day energization buffer built in.', tools:['sfs'] },
       // ── DAYS 12–14: Phase 1 field ─────────────────────────────────────────
       { t:28.0, wall:'Days 12–14', step:'field',       agent:'Field Closeout Agent', badge:'hybrid', human:true,
-        msg:'Phase 1 field work complete: 1,090 ft trench, conduit, URD cable pull, terminations at both ends. Foreman safety sign-off captured each day in SFS.', tools:['sfs'] },
+        msg:'Phase 1 complete: 1,090 ft trench, conduit set, URD cable pulled and terminated. Foreman safety sign-off captured each day in SFS.', tools:['sfs'] },
       // ── DAY 38: Transformer set ────────────────────────────────────────────
       { t:30.0, wall:'Day 38 · 08:00', step:'field',   agent:'Field Closeout Agent', badge:'hybrid',
-        msg:'500 kVA transformer delivered and set on concrete pad. Crew-supervisor safety inspection passed. Primary connections made and torqued.', tools:['sfs'] },
-      // ── DAY 41: Commissioning ─────────────────────────────────────────────
-      { t:32.0, wall:'Day 41 · 07:30', step:'field',   agent:'Commissioning Lead', badge:'user', human:true,
-        msg:'Commissioning tests executed: insulation resistance, phasing verification, load bank step-test. All pass. Manual sign-off captured.', tools:['sfs'] },
-      { t:33.8, wall:'Day 41 · 11:00', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
-        msg:'GIS updated with pad-mount location and 1,090 ft URD as-built geometry. Meter activated in SAP ISU. OPP-4828 closed.', tools:['gis','isu'] },
-      { t:35.5, wall:'Day 41 · 11:01', step:'sync',    agent:'System', badge:'success',
-        msg:'Complete. Human touchpoints: 6 (facilities lead, Sr. Engineer site walk + override, legal redline, CFO signature, crew safety sign-offs, commissioning). Cycle time: 41 business days vs. 94-day legacy — 56% reduction. Remaining cycle time is transformer lead — a physical constraint no agent can compress.', tools:[] },
+        msg:'500 kVA transformer delivered and set on concrete pad. Crew-supervisor safety inspection passed. Primary connections made and torqued to spec.', tools:['sfs'] },
+      // ── DAY 43: Commissioning ─────────────────────────────────────────────
+      { t:32.0, wall:'Day 43 · 07:30', step:'field',   agent:'Commissioning Lead', badge:'user', human:true,
+        msg:'Commissioning tests executed: insulation resistance, phasing verification, load bank step-test. All pass. Manual sign-off captured and filed.', tools:['sfs'] },
+      // ── DAY 46: DSIS clears ───────────────────────────────────────────────
+      { t:33.8, wall:'Day 46 · 09:00', step:'sync',    agent:'Regulatory Coordination Agent', badge:'hybrid',
+        msg:'DSIS clearance received from grid planning (Day 46 — within estimated window). No grid reinforcement required. Energization authorized by grid ops.', tools:['ccm'] },
+      { t:35.2, wall:'Day 46 · 11:00', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
+        msg:'GIS updated with pad-mount and 1,090 ft URD as-built. Meter activated in SAP ISU. OPP-4828 closed.', tools:['gis','isu'] },
+      { t:36.8, wall:'Day 46 · 11:01', step:'sync',    agent:'System', badge:'success',
+        msg:'Complete. Human touchpoints: 6 (facilities lead, Sr. Engineer site walk + override, PE stamp, legal redline, CFO signature, commissioning). Cycle time: 46 business days vs. 94-day legacy — 51% reduction. Key driver: DSIS filed Day 1 (parallel) vs. Day 9+ (legacy sequential). Field and transformer lead unchanged — physical constraints no agent can compress.', tools:[] },
     ],
   };
 
@@ -700,7 +717,7 @@
     if (typeof ev.conf === 'number') {
       $kConf.textContent = ev.conf.toFixed(1) + '%';
       $kConf.style.color = ev.conf >= 90 ? 'var(--agentic)' : 'var(--warn)';
-      $kConfSub.textContent = ev.conf >= 90 ? 'Auto-approved · no review' : 'Below threshold · routed to engineer';
+      $kConfSub.textContent = ev.conf >= 90 ? 'High completeness · PE formal review expedited' : 'Completeness flag · Sr. Engineer escalation required';
     }
     if (ev.badge === 'success') {
       const meta = getScenarioMeta();

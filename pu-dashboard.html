@@ -244,6 +244,7 @@
     <a href="pu-story.html">Story</a>
     <a href="pu-agent-console.html">Console</a>
     <a href="pu-dashboard.html" class="active">Dashboard</a>
+    <a href="pu-faq.html">FAQ</a>
   </nav>
 </header>
 
@@ -278,33 +279,33 @@
     </div>
     <div class="card kpi">
       <h3>Avg cycle time</h3>
-      <div class="val">3.8 d</div>
-      <div class="delta">↓ 92% vs legacy (47 d)</div>
-      <div class="ctx">Rolling 30-day average</div>
+      <div class="val">20 d</div>
+      <div class="delta">↓ 57% vs legacy (47 d)</div>
+      <div class="ctx">Rolling 30-day average · residential</div>
     </div>
     <div class="card kpi">
       <h3>Straight-through rate</h3>
-      <div class="val">87.3%</div>
-      <div class="delta">↑ 2.1 pp WoW</div>
-      <div class="ctx">No human touch required</div>
+      <div class="val">58.4%</div>
+      <div class="delta">↑ 1.8 pp WoW</div>
+      <div class="ctx">No human rework required</div>
     </div>
     <div class="card kpi">
       <h3>Design-from-Zero</h3>
       <div class="val" style="color:var(--agentic);">94.1%</div>
-      <div class="delta">avg confidence</div>
-      <div class="ctx">Auto-approve threshold: 90%</div>
+      <div class="delta">avg completeness score</div>
+      <div class="ctx">All designs routed to PE review</div>
     </div>
     <div class="card kpi">
       <h3>Human touchpoints</h3>
-      <div class="val">1.4</div>
-      <div class="delta">↓ from 23 legacy</div>
-      <div class="ctx">Avg per connection</div>
+      <div class="val">4.8</div>
+      <div class="delta">↓ from 23 legacy avg</div>
+      <div class="ctx">Weighted avg across all cases</div>
     </div>
     <div class="card kpi">
       <h3>OpEx savings (MTD)</h3>
-      <div class="val">$1.42M</div>
-      <div class="delta">on pace for $18.4M/yr</div>
-      <div class="ctx">vs. legacy baseline</div>
+      <div class="val">$1.1M</div>
+      <div class="delta">on pace for $13.4M/yr</div>
+      <div class="ctx">vs. legacy baseline ($1,530/conn saved)</div>
     </div>
   </div>
 
@@ -374,7 +375,7 @@
     <h3>Design-from-Zero · Confidence Distribution (last 30d)</h3>
     <div class="chart-wrap"><canvas id="chartConf"></canvas></div>
     <div style="margin-top:0.6rem;font-size:0.76rem;color:var(--text-2);">
-      <strong style="color:var(--text);">89.3%</strong> of designs auto-approved (≥90% confidence). Remaining 10.7% routed to senior engineers — avg review time 14 min.
+      <strong style="color:var(--text);">58.4%</strong> of designs pass completeness check with no PE comment. All designs are reviewed and stamped by a licensed PE — the completeness score reduces PE prep time, not PE accountability.
     </div>
   </div>
 
@@ -438,7 +439,7 @@
     <h3>Live Event Feed</h3>
     <div class="feed-item">
       <span class="feed-ring agentic"></span>
-      <div><div class="feed-meta">09:41:58 · Design-from-Zero</div><div class="feed-msg">OPP-4851 auto-approved at 96.4% confidence · residential 200A</div></div>
+      <div><div class="feed-meta">09:41:58 · Design-from-Zero</div><div class="feed-msg">OPP-4851 design complete · 96.4% completeness score · routed to PE J. Okafor review queue</div></div>
     </div>
     <div class="feed-item">
       <span class="feed-ring alert"></span>
@@ -550,8 +551,8 @@
     data: {
       labels: ['Intake', 'Design', 'Contract', 'Payment', 'Construct', 'Close'],
       datasets: [
-        { label:'Legacy (days)',     data:[2, 9, 6, 4, 18, 8], backgroundColor:'rgba(194,65,12,0.65)', borderRadius:4 },
-        { label:'Reimagined (days)', data:[0.02, 0.04, 0.6, 0.05, 2.8, 0.3], backgroundColor:'rgba(10,122,59,0.85)', borderRadius:4 },
+        { label:'Legacy (days)',     data:[2, 9, 6, 4, 18, 8],  backgroundColor:'rgba(194,65,12,0.65)', borderRadius:4 },
+        { label:'Reimagined (days)', data:[0.1, 4, 3, 1, 10, 2], backgroundColor:'rgba(10,122,59,0.85)', borderRadius:4 },
       ],
     },
     options: {

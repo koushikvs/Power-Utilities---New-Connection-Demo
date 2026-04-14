@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Hard Questions — New Connection Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff;
+      --surface: #f9fafb;
+      --border: rgba(0,0,0,0.09);
+      --border-strong: rgba(0,0,0,0.16);
+      --text: #111827;
+      --muted: #6b7280;
+      --faint: #9ca3af;
+      --accent: #0071e3;
+      --warn-bg: #fff7ed;
+      --warn-border: rgba(194,65,12,0.22);
+      --warn-text: #92400e;
+      --ok-bg: #f0fdf4;
+      --ok-border: rgba(10,122,59,0.22);
+      --ok-text: #065f46;
+      --note-bg: #f0f7ff;
+      --note-border: rgba(0,113,227,0.22);
+      --note-text: #1e40af;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 44px;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand a { color: var(--text); text-decoration: none; font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; }
+    .hdivider { width: 1px; height: 16px; background: var(--border-strong); }
+    .crumb { font-size: 12.5px; color: var(--muted); }
+    nav { display: flex; gap: 2px; }
+    nav a { font-size: 12px; color: var(--muted); text-decoration: none; padding: 4px 10px; border-radius: 980px; transition: all 0.18s; }
+    nav a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+    nav a.active { color: var(--accent); background: rgba(0,113,227,0.08); }
+
+    /* HERO */
+    .hero { max-width: 720px; margin: 0 auto; padding: 4rem 24px 2.5rem; }
+    .hero-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .hero h1 { font-size: clamp(1.9rem, 3.5vw, 2.8rem); font-weight: 600; letter-spacing: -0.015em; line-height: 1.1; margin-bottom: 1rem; }
+    .hero p { font-size: 1.02rem; color: var(--muted); line-height: 1.6; max-width: 620px; }
+    .hero-note {
+      margin-top: 1.5rem; padding: 14px 18px;
+      background: var(--note-bg); border: 1px solid var(--note-border);
+      border-radius: 10px; font-size: 13.5px; color: var(--note-text); line-height: 1.6;
+    }
+
+    /* PAGE */
+    .page { max-width: 720px; margin: 0 auto; padding: 0 24px 6rem; }
+
+    /* SECTION */
+    .section { margin-bottom: 3.5rem; }
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 0.9rem;
+      border-bottom: 2px solid var(--text);
+      margin-bottom: 1.6rem;
+    }
+    .section-num {
+      width: 26px; height: 26px; border-radius: 5px;
+      background: var(--text); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .section-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.005em; }
+
+    /* Q&A */
+    .qa { margin-bottom: 1.8rem; }
+    .q {
+      font-size: 0.94rem; font-weight: 600; color: var(--text);
+      margin-bottom: 0.55rem; letter-spacing: -0.005em;
+      padding-left: 1rem; border-left: 3px solid var(--border-strong);
+    }
+    .a { font-size: 0.89rem; color: #374151; line-height: 1.72; padding-left: 1rem; }
+    .a strong { color: var(--text); }
+
+    /* CALLOUTS */
+    .callout { margin-top: 0.7rem; padding: 12px 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+    .callout.warn  { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+    .callout.ok    { background: var(--ok-bg);   border: 1px solid var(--ok-border);   color: var(--ok-text); }
+    .callout.note  { background: var(--note-bg); border: 1px solid var(--note-border); color: var(--note-text); }
+    .callout strong { font-weight: 700; }
+
+    /* COST TABLE */
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 0.8rem; }
+    .cost-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); padding: 0 8px 7px; border-bottom: 1px solid var(--border-strong); }
+    .cost-table th.num { text-align: right; }
+    .cost-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); color: #374151; vertical-align: top; line-height: 1.45; }
+    .cost-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+    .cost-table .sub { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+    .cost-table tr.total td { border-bottom: none; font-weight: 700; color: var(--text); border-top: 1px solid var(--border-strong); }
+
+    /* ROADMAP */
+    .roadmap { margin-top: 0.8rem; }
+    .rm-row { display: flex; gap: 16px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .rm-row:last-child { border-bottom: none; }
+    .rm-left { flex-shrink: 0; width: 110px; }
+    .rm-phase { font-weight: 700; color: var(--text); font-size: 13px; }
+    .rm-badge { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 7px; border-radius: 980px; border: 1px solid; }
+    .rm-badge.low  { color: var(--ok-text);   background: var(--ok-bg);   border-color: var(--ok-border); }
+    .rm-badge.med  { color: var(--warn-text);  background: var(--warn-bg); border-color: var(--warn-border); }
+    .rm-badge.high { color: var(--note-text);  background: var(--note-bg); border-color: var(--note-border); }
+    .rm-scope { font-size: 11.5px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+    .rm-desc { color: #374151; flex: 1; line-height: 1.55; }
+
+    footer {
+      border-top: 1px solid var(--border); text-align: center;
+      padding: 2rem 24px; font-size: 13px; color: var(--muted);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <a href="index.html">⚡ New Connection Agent</a>
+    <span class="hdivider"></span>
+    <span class="crumb">The Hard Questions</span>
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="pu-story.html">Story</a>
+    <a href="pu-agent-console.html">Console</a>
+    <a href="pu-dashboard.html">Dashboard</a>
+    <a href="pu-faq.html" class="active">FAQ</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">Chapter 4 · Scrutiny</div>
+  <h1>The questions that will be asked in the room.</h1>
+  <p>Every serious AI program in a regulated utility gets stress-tested before it gets funded. This page addresses what a CIO, VP Engineering, regulatory affairs lead, or CFO is likely to raise — answered plainly, with the assumptions visible.</p>
+  <div class="hero-note">
+    <strong>A note on scope:</strong> This program separates two value propositions with different risk profiles. <strong>(1) Coordination and workflow automation</strong> — eliminating queue time, document chasing, and handoffs. Deployable today with low regulatory friction; the business case stands on this alone. <strong>(2) Autonomous engineering design generation</strong> — valuable, but requires a formal validation program and regulatory engagement before production use. The recommended roadmap treats these as sequential phases, not a single launch.
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECTION 1 — REGULATORY & PE LIABILITY
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Regulatory &amp; PE Liability</div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Who bears PE liability for an AI-generated design?</div>
+      <div class="a">
+        The stamping Professional Engineer — same as today, with no change to the liability model. The Design-from-Zero Agent produces a <strong>draft package</strong>, not a final design. The PE conducts an independent structured review, may request revisions (the residential simulation shows this explicitly), and issues a formal electronic stamp with a written attestation. State licensing boards require PEs to personally review what they seal — this program does not alter that obligation. What changes is the quality of the starting draft: PE prep time drops from approximately 8 hours to 2–3 hours because the agent has already performed load calculations, route optimisation, and BOM assembly. The PE's engineering judgement and professional liability remain fully intact.
+        <div class="callout ok"><strong>Key framing for engineering teams:</strong> The agent is a drafting assistant. The PE is the design authority. This distinction should be documented in the utility's AI governance policy before any design-generation capability goes live.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Does deploying this program require PUC or state regulatory approval?</div>
+      <div class="a">
+        It depends on which layer is being deployed. The <strong>coordination and workflow automation layer</strong> — intake, qualification, contract routing, payment orchestration, dispatch — operates within existing tariff authority and does not require new regulatory filings in most US jurisdictions. It is functionally equivalent to improving an internal business process. The <strong>design generation layer</strong> is a different matter: using an AI model to produce designs that are then PE-reviewed and used to issue construction orders warrants proactive engagement with the state PUC and the state engineering licensing board. The recommended approach is to file a voluntary compliance inquiry before Phase 2 begins, rather than discover a compliance issue after deployment.
+        <div class="callout warn"><strong>Do not deploy design generation in production without a regulatory engagement plan.</strong> The coordination layer can go live independently and should.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">How does a 1 MW commercial connection interact with FERC and state DSIS requirements?</div>
+      <div class="a">
+        Loads at or above the state PUC threshold — typically 500 kW to 1 MW depending on jurisdiction — trigger a Distribution System Impact Study, a regulatory process that runs on its own timeline, typically 45–55 business days. <strong>No agent can compress this timeline.</strong> It is a regulatory constraint, not an operational one. What the agent does is initiate the DSIS on Day 1, in parallel with design, contracting, and construction work, rather than waiting until after design approval — a sequencing change that recovers 8–12 days that legacy processes lost to sequential queuing. The commercial scenario in the simulation reflects this accurately: the DSIS runs as a parallel track, not a blocker, and the agent flags energisation as contingent on DSIS clearance throughout the workflow.
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Does NERC CIP or state cybersecurity regulation affect the agent's access to operational data?</div>
+      <div class="a">
+        The agents read and write to CCM, SAP ISU, WAM, GIS, and SFS through existing API layers — they do not have direct access to SCADA, EMS, or any bulk electric system control systems. GIS access is limited to the distribution network model (not transmission). This architecture keeps the agent environment outside the NERC CIP Electronic Security Perimeter. That said, the utility's IT security team should review the API access scope and confirm that the agent service accounts are provisioned under the principle of least privilege. An OT/IT boundary review is standard practice before any new system integration and should be included in the Phase 1 deployment checklist.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECTION 2 — DATA & MODEL TRUST
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Data &amp; Model Trust</div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What is the design model trained on, and how was it validated?</div>
+      <div class="a">
+        The model is trained on the utility's own historical as-built design packages — typically 5–10 years of stamped residential and light commercial designs, sourced from the utility's GIS and document management system. It is not trained on generic internet data or designs from other utilities. Validation uses a holdout set of historical designs, measuring agreement with the PE's final stamped output across load calculations, conductor sizing, route selection, and BOM line items. Initial go-live requires ≥95% agreement on residential cases over a 500-design validation set. Results are documented and made available for regulatory inspection.
+        <div class="callout note"><strong>The most significant deployment risk is training data quality.</strong> Utilities with incomplete or inconsistently digitised historical design records will need a data remediation workstream before model training can begin. This should be assessed in the pre-Phase 2 scoping.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">How is model drift detected and managed over time?</div>
+      <div class="a">
+        Every PE-stamped design becomes a labelled training record. PE revisions — where the PE modifies the agent's draft before stamping — are flagged as correction signals and reviewed at 90-day intervals. A drift monitoring dashboard tracks revision frequency: if the rate of PE corrections rises above a defined threshold (default: 8% of designs), the model is flagged for retraining before it materially increases PE workload. Annual model retraining is conducted using the prior 12 months of stamped designs. This cadence is documented in the AI governance policy as a standing operational commitment, not an ad-hoc activity.
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What happens when GIS or WAM data is stale or incorrect?</div>
+      <div class="a">
+        The agent includes an explicit data-freshness check at the premise reconciliation step. When a GIS asset record has not been field-verified within a configurable threshold (default: 12 months), the agent triggers an automatic WAM re-sync before proceeding with design generation. This is shown in the residential simulation: a stale transformer record is detected, the WAM re-sync completes in 38 minutes with no human intervention required, and design generation proceeds on confirmed data. The agent never silently accepts stale data. If re-sync fails or produces an irreconcilable conflict, the case is escalated to a field verification queue and held until the data is confirmed.
+        <div class="callout ok">This is a meaningful improvement over the legacy process, where stale GIS data was typically discovered during field execution — an expensive point in the workflow to find a data error.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">The simulation shows a "completeness score." Is that the approval gate?</div>
+      <div class="a">
+        No — explicitly not. The completeness score is an internal diagnostic that checks whether the design package contains all 22 required elements: load calculation, conductor sizing, transformer headroom check, BOM completeness, route clearances, applicable code references, and so on. A high score means the PE is starting from a well-formed draft. A low score means the PE should scrutinise further and the case may need senior engineer review. Every design, regardless of score, is routed to PE review. The score is visible to the PE as context — not as a recommendation to approve or a proxy for engineering judgement. This distinction is documented in the PE review protocol and should be part of the PE training programme at go-live.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECTION 3 — IT INTEGRATION & RISK
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">IT Integration &amp; Risk</div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Does this require replacing SAP ISU, GIS, or any system of record?</div>
+      <div class="a">
+        No. The architecture is an orchestration layer over existing systems — CCM, SAP ISU, SAP WAM, GIS, SAP SFS, and DocuSign — via their published API interfaces. No system of record is replaced, migrated, or re-implemented. This is a deliberate design principle: stabilise and extend what exists rather than introduce replacement risk. The integration risk profile is API availability and data quality, not system transformation. Utilities currently on SAP S/4HANA can use the same integration layer; the agent does not require ISU-specific APIs where S/4HANA equivalents exist.
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What happens when an API call fails or a downstream system is unavailable?</div>
+      <div class="a">
+        Each agent implements a circuit-breaker pattern. On a transient failure, the agent retries up to three times with exponential backoff. If retries are exhausted, the case is escalated to a human work queue with the specific failure reason and full case context. <strong>No transaction is silently dropped.</strong> The agent preserves all data collected to that point in a persistent state store, so when the system recovers, the workflow resumes from the last confirmed step — it does not restart from the beginning. All failure events are logged in a tamper-evident audit trail.
+        <div class="callout note">The reliability of this pattern depends on the stability of the utility's existing middleware and API layer. Utilities with older SOAP-based SAP integrations should assess middleware maturity as part of the Phase 1 integration design. This is a discovery item, not a blocker.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">How is customer and operational data protected?</div>
+      <div class="a">
+        Customer PII is handled within the utility's existing CCM data perimeter — the agent reads and writes through CCM APIs and does not create a separate customer data store. Engineering design data (GIS coordinates, asset IDs, load profiles) is treated as operational data and is not transmitted to external AI training infrastructure. Model training runs on-premises or in the utility's private cloud environment using de-identified historical design packages. All agent-to-system interactions are logged in a tamper-evident audit trail. Data retention policies for agent logs follow the utility's existing records management schedule.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECTION 4 — LABOR & CHANGE MANAGEMENT
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Labor &amp; Change Management</div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Does this program eliminate PE or engineering jobs?</div>
+      <div class="a">
+        No — it eliminates PE prep time and administrative queue management, not PE positions. In most utilities, engineers spend 60–70% of their time on document assembly, queue coordination, and rework chasing rather than engineering judgement. This program redirects that capacity toward higher-value work: grid modernisation studies, interconnection backlog review, renewable integration design, and complex commercial cases. Engineering team size stays flat or grows as the grid-mod programme accelerates. The headcount model targets redeployment, not reduction.
+        <div class="callout ok"><strong>The strongest framing for engineering teams:</strong> "We are giving you back the engineering work. The agents handle the paperwork."</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What happens to the CSRs who currently handle new-connection intake and coordination?</div>
+      <div class="a">
+        Straight-through residential cases — estimated at 58% of volume — are handled end-to-end without CSR involvement. The remaining 42% still require skilled CSR support: complex commercial cases, escalations, customers who prefer telephone interaction, and accommodation requests. The target operating model moves CSR roles from data-entry and queue management toward case management and customer advocacy for complex interactions. At a 12,000-connection-per-year utility, natural attrition over a 24-month transition absorbs most of the capacity reduction in the base case. No involuntary reductions are projected. Utilities with higher volumes or shorter transition windows should build a specific workforce transition plan.
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">How are field crews affected, and does this require union consultation?</div>
+      <div class="a">
+        Field crews see two changes: optimised dispatch scheduling (how they receive assignments) and AI-assisted as-built photo validation (the closeout step). Both are delivered through the existing SFS mobile interface — no new device or app is required. Dispatch optimisation benefits crews directly by reducing same-day schedule changes and improving parts staging accuracy. The as-built validation step adds a structured photo-capture workflow but removes the manual paper-based closeout form; net field time impact is negligible. Union consultation on the dispatch scheduling algorithm — specifically the parameters governing crew assignment and rest-period compliance — is recommended as part of deployment planning and should be initiated in Phase 1.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SECTION 5 — BUSINESS CASE & IMPLEMENTATION
+       ════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Business Case &amp; Implementation</div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Where does the $310 cost-per-connection savings figure come from? Show the build-up.</div>
+      <div class="a">
+        The $310 is the net savings per residential connection after netting AI infrastructure cost against gross labour and rework savings. Here is the full build-up:
+
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Cost driver</th>
+              <th class="num">Legacy</th>
+              <th class="num">Reimagined</th>
+              <th class="num">Savings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CSR and coordination labour<span class="sub">18 fewer touchpoints × 30 min avg × $65/hr effective rate</span></td>
+              <td class="num">$975</td><td class="num">$195</td><td class="num">$780</td>
+            </tr>
+            <tr>
+              <td>Engineering prep and queue management<span class="sub">PE prep 8 hrs → 2.5 hrs × $85/hr blended; queue coordination eliminated</span></td>
+              <td class="num">$680</td><td class="num">$213</td><td class="num">$467</td>
+            </tr>
+            <tr>
+              <td>Rework and re-inspection cost<span class="sub">18% rework rate → 3.8% × avg $480 rework event cost</span></td>
+              <td class="num">$185</td><td class="num">$18</td><td class="num">$167</td>
+            </tr>
+            <tr>
+              <td>AI infrastructure &amp; licensing offset<span class="sub">$8M implementation ÷ 3 yr ÷ 12,000 connections/yr</span></td>
+              <td class="num">—</td><td class="num">$222</td><td class="num">($222)</td>
+            </tr>
+            <tr class="total">
+              <td>Net savings per connection</td>
+              <td class="num">$1,840</td><td class="num">$648</td><td class="num">$1,192</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;">These assumptions should be stress-tested against your utility's actual labour cost structure, rework rate, and connection volume. The labour rates are representative for a mid-sized US investor-owned utility; publicly-owned utilities with different wage structures will produce different numbers.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What is the payback period, and what assumptions drive it?</div>
+      <div class="a">
+        At $1,192 net savings per connection and 12,000 connections per year, net annual savings are approximately <strong>$14.3M</strong>. Against an implementation cost of $8–12M (depending on data readiness and integration complexity), payback is <strong>7–10 months</strong> on direct OpEx savings alone, before the value of engineering capacity release is included. At a utility carrying a $250M grid-modernisation backlog, redirecting 25–30 engineering FTEs toward that backlog has a value that substantially exceeds the direct OpEx case — but that value is harder to quantify and should be kept separate from the primary business case to preserve credibility with a CFO audience.
+        <div class="callout note">The payback calculation is most sensitive to the rework rate assumption and the labour cost inputs. Utilities with better current-state rework rates will see a smaller improvement; utilities with worse rates (common in high-growth corridors where GIS data quality is low) will see a larger one.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What does the implementation roadmap look like, and what are the go/no-go gates?</div>
+      <div class="a">
+        A three-phase approach separates low-risk coordination automation from higher-risk design generation, with explicit validation gates before each phase advances.
+        <div class="roadmap">
+          <div class="rm-row">
+            <div class="rm-left">
+              <div class="rm-phase">Phase 1</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Months 1–6</div>
+              <div class="rm-badge low">Low risk</div>
+            </div>
+            <div class="rm-desc">
+              <div class="rm-scope">Coordination layer only — Intake, Qualification, Contract, Payment, Dispatch</div>
+              Deploy agent coordination on a single service territory pilot, targeting 300 residential connections. No design generation. Estimated cycle time improvement: 25–30%. Establishes baseline metrics, builds operator confidence, and surfaces API integration issues before higher-stakes capabilities go live. <strong>Go/no-go gate:</strong> ≥25% cycle time reduction, &lt;0.5% transaction failure rate, field rework rate unchanged.
+            </div>
+          </div>
+          <div class="rm-row">
+            <div class="rm-left">
+              <div class="rm-phase">Phase 2</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Months 7–15</div>
+              <div class="rm-badge med">Validation required</div>
+            </div>
+            <div class="rm-desc">
+              <div class="rm-scope">Design generation pilot — advisory mode with parallel PE review</div>
+              Deploy Design-from-Zero in shadow mode: agent generates draft, PE independently reviews from scratch, outputs compared. Validate agreement rate ≥95% over 500 cases across residential and light commercial. Engage state PUC and engineering licensing board with validation study results. No construction orders released from agent designs until validation is complete and regulatory engagement is documented. <strong>Go/no-go gate:</strong> ≥95% PE agreement rate, regulatory sign-off received, PE training programme complete.
+            </div>
+          </div>
+          <div class="rm-row">
+            <div class="rm-left">
+              <div class="rm-phase">Phase 3</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Months 16–22</div>
+              <div class="rm-badge high">Full deployment</div>
+            </div>
+            <div class="rm-desc">
+              <div class="rm-scope">Full orchestrated workflow — all agents, all connection types</div>
+              Full agent-orchestrated workflow including design generation, with PE reviewing the agent draft rather than generating from scratch. Target cycle time improvement: 55–60% for residential, 40–45% for commercial (DSIS-constrained). Ongoing: quarterly drift monitoring, annual model retraining, annual regulatory reporting. Complex commercial cases (&gt;2 MW) remain on manual design track pending extended validation.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What does the Phase 1 pilot cost, and what does success look like?</div>
+      <div class="a">
+        Estimated Phase 1 cost: <strong>$1.2M–$1.8M</strong> depending on integration complexity and data readiness. The range is primarily driven by the condition of the utility's existing API layer — a utility with modern REST APIs for SAP ISU and CCM will be at the low end; one requiring middleware development will be at the high end.
+
+        Success at the end of Phase 1 means: (1) cycle time reduced by ≥25% on the pilot cohort versus the prior-year control group in the same territory; (2) human touchpoints per connection reduced to ≤8 (not yet at the full 5-touchpoint target — that comes with design generation in Phase 2); (3) transaction failure rate &lt;0.5%; (4) field rework rate unchanged or improved; (5) operator satisfaction score ≥7/10 from CSR and dispatch teams. The pilot should be run with a dedicated operations monitor who documents every edge case and failure mode — these learnings directly shape Phase 2 design and are more valuable than the KPI results alone.
+      </div>
+    </div>
+
+  </div><!-- /section 5 -->
+
+</div><!-- /page -->
+
+<footer>
+  New Connection Agent · The Hard Questions &nbsp;·&nbsp;
+  <a href="pu-agent-console.html">See the simulation →</a>
+  &nbsp;·&nbsp;
+  <a href="pu-story.html">Read the story →</a>
+  &nbsp;·&nbsp;
+  <a href="index.html">← Home</a>
+</footer>
+
+</body>
+</html>
