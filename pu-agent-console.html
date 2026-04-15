@@ -369,7 +369,7 @@
       <div class="sys-card" data-sys="ccm">
         <div class="sys-row">
           <div class="sys-chip ccm">CCM</div>
-          <div class="sys-meta"><div class="sys-name">CCM</div><div class="sys-role">Opportunity &amp; documents</div></div>
+          <div class="sys-meta"><div class="sys-name">Salesforce CCM</div><div class="sys-role">Opportunity · quote · contract</div></div>
           <div class="sys-count idle">0</div>
         </div>
       </div>
@@ -383,21 +383,21 @@
       <div class="sys-card" data-sys="wam">
         <div class="sys-row">
           <div class="sys-chip wam">WAM</div>
-          <div class="sys-meta"><div class="sys-name">SAP WAM</div><div class="sys-role">Assets &amp; materials</div></div>
+          <div class="sys-meta"><div class="sys-name">SAP S/4 WAM</div><div class="sys-role">Notification · WBSe · assets</div></div>
           <div class="sys-count idle">0</div>
         </div>
       </div>
       <div class="sys-card" data-sys="isu">
         <div class="sys-row">
           <div class="sys-chip isu">ISU</div>
-          <div class="sys-meta"><div class="sys-name">SAP ISU</div><div class="sys-role">Contracts · payment · orders</div></div>
+          <div class="sys-meta"><div class="sys-name">SAP S/4 ISU</div><div class="sys-role">BMD · TMD · CIAC · meter order</div></div>
           <div class="sys-count idle">0</div>
         </div>
       </div>
       <div class="sys-card" data-sys="sfs">
         <div class="sys-row">
           <div class="sys-chip sfs">SFS</div>
-          <div class="sys-meta"><div class="sys-name">SAP SFS</div><div class="sys-role">Dispatch &amp; field execution</div></div>
+          <div class="sys-meta"><div class="sys-name">Salesforce Field Service</div><div class="sys-role">Dispatch · crew execution (SCH→NPRG→FCMP)</div></div>
           <div class="sys-count idle">0</div>
         </div>
       </div>
@@ -483,7 +483,7 @@
       { t:1.3,  wall:'Day 1 · 09:06', step:'intake',  agent:'Intake Agent', badge:'agentic',
         msg:'Premise geocoded to 2847 Willow Ridge Dr. Builder license verified (valid 2028). County plat auto-pulled.', tools:['dig','ccm'] },
       { t:2.6,  wall:'Day 1 · 09:10', step:'qualify', agent:'Qualification Agent', badge:'agentic',
-        msg:'OPP-4827 created in CCM. Tariff: RES-D. Soft credit: pass. Service territory eligibility confirmed.', tools:['ccm'] },
+        msg:'OPP-4827 created in Salesforce CCM. Tariff: RES-D. Soft credit: pass. Service territory eligibility confirmed. SAP S/4 WAM Notification raised; OpenText workspace linked.', tools:['ccm'] },
       { t:4.2,  wall:'Day 1 · 09:28', step:'premise', agent:'Premise / TMD Reconciliation', badge:'hybrid',
         msg:'TMD pulled from GIS; reconciled with WAM asset record for transformer P#487319. Delta 0.4% — auto-accepted.', tools:['gis','wam'] },
       // ── DAY 1: Design — with stale-data recovery ───────────────────────────
@@ -507,12 +507,12 @@
         msg:'Revision accepted. PE completed full review of revised package (load calcs, conductor sizing, NEC compliance, route clearances). Electronic stamp and seal applied with documented attestation. Total PE engagement: ~2.5 hrs across 1.5 business days. PE retains full professional liability per state code.', tools:[] },
       // ── DAY 3: Contract drafted and sent ──────────────────────────────────
       { t:18.0, wall:'Day 3 · 14:30', step:'contract', agent:'Contract Agent', badge:'hybrid',
-        msg:'Stamped BMD drafted: $8,420 CIAC (customer charge). DocuSign sent to alex@willowridge.com. 2-business-day review window included.', tools:['isu','ds'] },
+        msg:'BMD drafted in SAP S/4 ISU with CIAC calculated. Contract generated in Salesforce CCM; DocuSign sent to alex@willowridge.com. 2-business-day review window included.', tools:['isu','ds'] },
       // ── DAY 5: Customer signs, payment, CO ────────────────────────────────
       { t:20.0, wall:'Day 5 · 08:22', step:'contract', agent:'Alex Martinez', badge:'user', human:true,
         msg:'Customer signed after 2-day review period. Scheduling window chosen: crew dispatch within 5 business days.', tools:['ds'] },
       { t:21.3, wall:'Day 5 · 08:24', step:'payment',  agent:'Payment Orchestration (Lean Core)', badge:'lean',
-        msg:'Invoice posted to SAP ISU. $8,420 captured via ACH. Escrow held pending energization.', tools:['isu'] },
+        msg:'CIAC invoice posted to SAP S/4 ISU. Payment captured via Payment Vendor (ACH). Escrow held pending energization.', tools:['isu'] },
       { t:22.6, wall:'Day 5 · 08:30', step:'construction', agent:'Construction Order Release', badge:'lean',
         msg:'CO-338412 released. All materials confirmed in-stock at WH-North — no long-lead items. Work order propagated to warehouse and scheduling.', tools:['isu','wam'] },
       // ── DAY 5: Dispatch — realistic crew backlog ───────────────────────────
@@ -520,11 +520,11 @@
         msg:'Territory crew queue: 6 URD crews active, 14 connections ahead in Willow Ridge zone. Earliest available slot: Day 19. Union rest-period and crew certification rules applied. Crew Blue-7 assigned. Materials staged Day 18. Weather window confirmed clear.', tools:['sfs'] },
       // ── DAY 19: Field execution ────────────────────────────────────────────
       { t:26.5, wall:'Day 19 · 07:14', step:'field',   agent:'Field Closeout Agent', badge:'hybrid',
-        msg:'Crew Blue-7 on site. Trench (142 ft), conductor pull, and meter set completed in one visit (5.5 hr). Foreman safety sign-off captured in SFS.', tools:['sfs'] },
+        msg:'Crew Blue-7 on site. Trench (142 ft), conductor pull, and meter set completed in one visit (5.5 hr). Salesforce Field Service status: SCH → NPRG → FCMP. Foreman safety sign-off captured.', tools:['sfs'] },
       { t:28.2, wall:'Day 19 · 13:48', step:'field',   agent:'Field Closeout Agent', badge:'hybrid', human:true,
         msg:'As-built photos captured. AI vision validated meter install, grounding electrode, trench depth, conductor clearances. 1 QA flag (conduit label orientation) — resolved by supervisor in 18 min.', tools:['sfs'] },
       { t:30.0, wall:'Day 19 · 15:05', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
-        msg:'TMD updated in GIS with as-built geometry. Meter MTR-99284 activated in SAP ISU. OPP-4827 closed. First bill cycle started.', tools:['gis','isu'] },
+        msg:'TMD updated in GIS and SAP S/4 ISU with as-built geometry. Meter Installation Order MTR-99284 executed; meter activated. SAP S/4 WAM Notification closed. OPP-4827 closed in Salesforce CCM. First bill cycle started.', tools:['gis','isu'] },
       { t:31.5, wall:'Day 19 · 15:06', step:'sync',    agent:'System', badge:'success',
         msg:'End-to-end complete. Human touchpoints: 5 (PE review + comment + stamp, customer signature, QA flag, crew safety sign-off). Cycle time: 19 business days vs. 47-day legacy — 60% reduction. Savings from eliminating queue time, stale-data delays, and coordination handoffs — not field execution. PE liability model unchanged.', tools:[] },
     ],
@@ -558,15 +558,15 @@
         msg:'Design re-optimized on Alternate B. Updated BOM: 1,090 ft total URD, 500 kVA pad-mount xfmr. Completeness score: 94.8%. Full PE review conducted by J. Okafor (2.5 hrs) — stamp applied. PE liability: unchanged from standard practice.', tools:['gis','wam','ml'], conf:94.8 },
       // ── DAY 5: Contract ────────────────────────────────────────────────────
       { t:17.5, wall:'Day 5 · 10:00', step:'contract', agent:'Contract Agent', badge:'hybrid',
-        msg:'Commercial BMD drafted: $214,800 CIAC + $4,200/mo demand charge. DocuSign sent to CFO and facilities lead. 4-business-day window for internal legal review. Note: energization date contingent on DSIS clearance (est. Day 46–56).', tools:['isu','ds'] },
+        msg:'Commercial BMD drafted in SAP S/4 ISU with CIAC and monthly demand charge calculated. DocuSign sent to CFO and facilities lead. 4-business-day window for internal legal review. Note: energization date contingent on DSIS clearance (est. Day 46–56).', tools:['isu','ds'] },
       // ── DAY 7: Legal redline ──────────────────────────────────────────────
       { t:19.5, wall:'Day 7 · 14:00', step:'contract', agent:'BrightLogix (Legal)', badge:'user', human:true,
         msg:'Internal legal review complete. One redline: indemnification liability cap language — minor, accepted under utility standard rider. Contract updated in DocuSign.', tools:['ds'] },
       // ── DAY 9: CFO signs ──────────────────────────────────────────────────
       { t:21.5, wall:'Day 9 · 10:42', step:'contract', agent:'BrightLogix (CFO)', badge:'user', human:true,
-        msg:'Contract signed after 4-day review. Target energization: Day 48 (contingent on DSIS clearance). $214,800 CIAC accepted.', tools:['ds'] },
+        msg:'Contract signed after 4-day review. Target energization: Day 48 (contingent on DSIS clearance). CIAC accepted.', tools:['ds'] },
       { t:23.0, wall:'Day 9 · 10:45', step:'payment',  agent:'Payment Orchestration (Lean Core)', badge:'lean',
-        msg:'ACH wire received: $214,800. Escrow held until DSIS clearance received and meter activated. ISU billing profile created.', tools:['isu'] },
+        msg:'ACH wire received via Payment Vendor. Escrow held until DSIS clearance received and meter activated. SAP S/4 ISU billing profile created.', tools:['isu'] },
       { t:24.5, wall:'Day 9 · 11:15', step:'construction', agent:'Construction Order Release', badge:'lean',
         msg:'CO-338601 released. ⚠ Long-lead: 500 kVA pad-mount transformer — 28-business-day vendor lead. Procurement placed immediately. DSIS continues on parallel track.', tools:['isu','wam'] },
       // ── DAY 10: Dispatch ──────────────────────────────────────────────────
@@ -574,7 +574,7 @@
         msg:'Multi-phase crew plan: trenching Days 12–13, cable pull Day 14, transformer set Day 38, commissioning Day 43. DSIS clearance expected ~Day 46 — 3-day energization buffer built in.', tools:['sfs'] },
       // ── DAYS 12–14: Phase 1 field ─────────────────────────────────────────
       { t:28.0, wall:'Days 12–14', step:'field',       agent:'Field Closeout Agent', badge:'hybrid', human:true,
-        msg:'Phase 1 complete: 1,090 ft trench, conduit set, URD cable pulled and terminated. Foreman safety sign-off captured each day in SFS.', tools:['sfs'] },
+        msg:'Phase 1 complete: 1,090 ft trench, conduit set, URD cable pulled and terminated. Salesforce Field Service progression SCH → NPRG logged; foreman safety sign-off captured each day.', tools:['sfs'] },
       // ── DAY 38: Transformer set ────────────────────────────────────────────
       { t:30.0, wall:'Day 38 · 08:00', step:'field',   agent:'Field Closeout Agent', badge:'hybrid',
         msg:'500 kVA transformer delivered and set on concrete pad. Crew-supervisor safety inspection passed. Primary connections made and torqued to spec.', tools:['sfs'] },
@@ -585,7 +585,7 @@
       { t:33.8, wall:'Day 46 · 09:00', step:'sync',    agent:'Regulatory Coordination Agent', badge:'hybrid',
         msg:'DSIS clearance received from grid planning (Day 46 — within estimated window). No grid reinforcement required. Energization authorized by grid ops.', tools:['ccm'] },
       { t:35.2, wall:'Day 46 · 11:00', step:'sync',    agent:'GIS Sync (Lean Core)', badge:'lean',
-        msg:'GIS updated with pad-mount and 1,090 ft URD as-built. Meter activated in SAP ISU. OPP-4828 closed.', tools:['gis','isu'] },
+        msg:'GIS and SAP S/4 ISU TMD updated with pad-mount and 1,090 ft URD as-built. Meter Installation Order executed; commercial meter activated. SAP S/4 WAM Notification closed. OPP-4828 closed in Salesforce CCM.', tools:['gis','isu'] },
       { t:36.8, wall:'Day 46 · 11:01', step:'sync',    agent:'System', badge:'success',
         msg:'Complete. Human touchpoints: 6 (facilities lead, Sr. Engineer site walk + override, PE stamp, legal redline, CFO signature, commissioning). Cycle time: 46 business days vs. 94-day legacy — 51% reduction. Key driver: DSIS filed Day 1 (parallel) vs. Day 9+ (legacy sequential). Field and transformer lead unchanged — physical constraints no agent can compress.', tools:[] },
     ],

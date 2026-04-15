@@ -250,7 +250,7 @@
   <div class="wrap reveal">
     <div class="eyebrow">Chapter 1 · A day in the reimagined P&U</div>
     <h1>From 47 days<br/><span class="hi">to 19 days.</span></h1>
-    <p class="lede">A new connection at a mid-sized US utility used to mean 10 manual steps, 6 systems, 4 handoffs, and 47 days of average cycle time. Today, builder Alex Martinez requests a 400-amp service — and an autonomous agent orchestra eliminates every day of queue time, stale-data delays, and coordination handoffs. The crews still dig the trench. The PE still stamps the design. The agents compress everything in between.</p>
+    <p class="lede">A new connection today traverses <strong>25 discrete steps across 6 phases</strong>, nine systems of record (Salesforce CCM, SAP S/4 WAM, OpenText, SAP S/4 ISU, C4C, GIS, DocuSign, Payment Vendor, Salesforce Field Service) plus the Digital portal as customer channel, a branching engineering-design track, an internal quote approval, and 47 days of average cycle time. Builder Alex Martinez requests a 400-amp service — and an agent orchestra eliminates queue time, stale-data delays, and inter-system handoffs across that real stack. Crews still dig the trench. PEs still stamp design-required cases. Internal approvers still approve. The agents compress everything in between.</p>
     <div class="hero-extras">
       <span class="pill lean"><span class="pill-dot"></span>Lean Core</span>
       <span class="pill hybrid"><span class="pill-dot"></span>Hybrid Edge</span>
@@ -264,14 +264,14 @@
   <div class="wrap reveal">
     <div class="eyebrow">The shift</div>
     <h2>Every step, reimagined.</h2>
-    <p class="lede">The same underlying systems — CCM, SAP ISU, SAP WAM, GIS, SFS, Digital, DocuSign — but a fundamentally different operating model.</p>
+    <p class="lede">The same underlying stack — Salesforce CCM, SAP S/4 ISU, SAP S/4 WAM, C4C, GIS, OpenText, Digital portal, DocuSign, Payment Vendor, Salesforce Field Service — but a fundamentally different operating model across the 25-step flow.</p>
     <div class="ba">
       <div class="ba-card before">
         <div class="ba-label">Legacy · Today</div>
-        <h3>10 steps · 6 systems · 4 handoffs</h3>
+        <h3>25 steps · 9 systems · many handoffs</h3>
         <div class="ba-stat"><span class="k">Avg. cycle time</span><span class="v">47 days</span></div>
-        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">23</span></div>
-        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">9 days</span></div>
+        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">20+ across all phases</span></div>
+        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">9 days (design-required cases only)</span></div>
         <div class="ba-stat"><span class="k">Rework / escalation rate</span><span class="v">18%</span></div>
         <div class="ba-stat"><span class="k">Cost per connection (OpEx)</span><span class="v">Current-state baseline</span></div>
         <div class="ba-stat"><span class="k">Customer NPS</span><span class="v">Low / single-digit</span></div>
@@ -279,9 +279,9 @@
       <div class="ba-card after">
         <div class="ba-label">Reimagined · Today</div>
         <h3>Coordinated by agents · reviewed by people</h3>
-        <div class="ba-stat"><span class="k">Avg. cycle time</span><span class="v">19 days</span></div>
-        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">~5 (weighted avg)</span></div>
-        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">~2.5 days (draft + PE review)</span></div>
+        <div class="ba-stat"><span class="k">Avg. cycle time</span><span class="v">~19 days (design-required)</span></div>
+        <div class="ba-stat"><span class="k">Human touchpoints</span><span class="v">5–8 (decision-only)</span></div>
+        <div class="ba-stat"><span class="k">Engineering design time</span><span class="v">~2–3 days (draft + PE review)</span></div>
         <div class="ba-stat"><span class="k">Rework / escalation rate</span><span class="v">3.8%</span></div>
         <div class="ba-stat"><span class="k">Cost per connection (OpEx)</span><span class="v">Materially lower <span style="font-size:0.75rem;font-weight:400;color:var(--muted)">(net of AI infra; see FAQ build-up)</span></span></div>
         <div class="ba-stat"><span class="k">Customer NPS</span><span class="v">+20 to +30 target</span></div>
@@ -290,74 +290,108 @@
   </div>
 </section>
 
-<!-- ============== THE 10 STEPS REIMAGINED ============== -->
+<!-- ============== THE 25 STEPS REIMAGINED ============== -->
 <section class="story">
   <div class="wrap reveal">
     <div class="eyebrow">The orchestra</div>
-    <h2>Ten steps. Ten layers. One flow.</h2>
-    <p class="lede">Each step of the legacy journey is now executed by a Lean Core process, a Hybrid workflow, or an autonomous AI agent — with humans escalated to only when the decision genuinely needs them.</p>
+    <h2>Six phases. Twenty-five steps. One orchestrated flow.</h2>
+    <p class="lede">The current-state process runs 25 discrete steps across 6 phases — Request Intake, Validation &amp; Engineering, Customer Master Data &amp; Financial Setup, Quote/Contract/Payment, Construction, and Meter Installation / Closeout. Each phase is reimagined as a Lean Core process, a Hybrid workflow, or an autonomous AI agent, preserving the SAP S/4 and Salesforce systems of record. Humans are retained where judgement, liability, or authorisation genuinely requires them: the PE stamp (design-required cases), the internal quote approval, the WBSe approval for new scope, the dispatch supervisor release, and the crew safety sign-off.</p>
 
     <div class="steps">
       <div class="step">
-        <div class="step-head"><div class="step-num">1</div><span class="step-layer agentic">Agentic</span></div>
-        <h4>Intake Agent</h4>
-        <p>Ingests web, mobile, call-center, and email requests. Extracts intent, parses documents (vision AI), verifies identity via DMV/credit APIs.</p>
-        <div class="step-meta"><span>Digital</span><span>CCM</span></div>
+        <div class="step-head"><div class="step-num">1–3</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Intake &amp; Notification Agent</h4>
+        <p>Ingests web, mobile, and call-centre requests via the Digital portal. Creates the Opportunity in Salesforce CCM as the central tracking record, triggers the SAP S/4 WAM Notification via the CCM↔WAM interface, and lands uploaded documents (plans, permits, load info) into the linked OpenText workspace.</p>
+        <div class="step-meta"><span>Digital</span><span>Salesforce CCM</span><span>SAP S/4 WAM</span><span>OpenText</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">2</div><span class="step-layer agentic">Agentic</span></div>
-        <h4>Qualification Agent</h4>
-        <p>Creates the opportunity in CCM, runs eligibility + tariff classification, attaches validated documents — all without a CSR touching the record.</p>
-        <div class="step-meta"><span>CCM</span></div>
+        <div class="step-head"><div class="step-num">4</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Validation Agent</h4>
+        <p>Validates Opportunity completeness — service type (gas/electric/both), address, load data. Cancels invalid requests and loops back to customer when site load or location data is missing, instead of leaving the Opportunity to stall in a CSR queue.</p>
+        <div class="step-meta"><span>Salesforce CCM</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">3</div><span class="step-layer hybrid">Hybrid</span></div>
-        <h4>Premise / TMD Reconciliation</h4>
-        <p>Reconciles Technical Master Data between GIS (spatial) and SAP WAM (asset) in a single canonical record. Flags delta &gt;2% for review.</p>
-        <div class="step-meta"><span>GIS</span><span>SAP WAM</span></div>
+        <div class="step-head"><div class="step-num">5–7</div><span class="step-layer hybrid">Hybrid ★</span></div>
+        <h4>Engineering Triage &amp; WBSe Agent</h4>
+        <p>The engineer-reviewed "design required?" decision is preserved. Agent assembles the input package (distance from main, terrain, complexity) and routes for the engineering judgement. For <strong>design-required</strong> cases: new WBSe + GIS polygon created, routed through the existing WBSe approval gate. For <strong>no-design</strong> cases (the majority of simple residential): blanket pre-existing WBSe identified and applied. Opportunity status updated back to Salesforce CCM.</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span><span>GIS</span><span>Salesforce CCM</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">4</div><span class="step-layer agentic">Agentic ★</span></div>
-        <h4>Design-from-Zero Agent</h4>
-        <p>Generates a full engineered design draft in under 30 minutes: load calcs, conductor sizing, transformer placement, route optimisation, materials BOM. PE conducts independent structured review and issues formal stamp with attestation — typically within 2–3 days vs. 9-day legacy cycle. PE liability is unchanged.</p>
-        <div class="step-meta"><span>GIS</span><span>SAP WAM</span><span>ML model</span></div>
+        <div class="step-head"><div class="step-num">5–6</div><span class="step-layer agentic">Agentic ★</span></div>
+        <h4>Design-from-Zero Agent <span style="font-size:0.7rem;font-weight:500;color:var(--muted);">(design-required subset)</span></h4>
+        <p>Applies only to the subset of cases that require engineering design — typically ~40% of residential volume and most commercial. Drafts load calcs, conductor sizing, transformer placement, route optimisation against the GIS network model, and materials BOM in under 30 min. A credentialed PE conducts independent structured review and issues formal stamp with attestation — typically within 2–3 days vs. 9-day legacy cycle. <strong>PE liability is unchanged.</strong> Blanket-WBSe cases skip this step entirely.</p>
+        <div class="step-meta"><span>GIS</span><span>SAP S/4 WAM</span><span>ML model</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">5</div><span class="step-layer hybrid">Hybrid</span></div>
-        <h4>Contract Agent</h4>
-        <p>Auto-drafts BMD contract from design output, routes through DocuSign, negotiates scheduling windows via customer portal chat.</p>
-        <div class="step-meta"><span>SAP ISU</span><span>DocuSign</span></div>
+        <div class="step-head"><div class="step-num">8</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>BMD Setup</h4>
+        <p>Business Master Data — the customer's non-service billing account for connection charges — is created in SAP S/4 ISU. Straight-through posting; no CSR data entry.</p>
+        <div class="step-meta"><span>SAP S/4 ISU</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">6</div><span class="step-layer lean">Lean Core</span></div>
+        <div class="step-head"><div class="step-num">9</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>CIAC Calculation</h4>
+        <p>CIAC (Contribution in Aid of Construction) runs in SAP S/4 ISU — calculated amount, flat rate, or zero, depending on state regulations and opportunity type. Agent ensures inputs are complete; the calculation itself remains in ISU as system of record.</p>
+        <div class="step-meta"><span>SAP S/4 ISU</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">10</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>TMD Sync Agent</h4>
+        <p>Technical Master Data (premise, connection object, device location) is created or determined in SAP S/4 WAM, uploaded to C4C, then pushed to GIS to reflect the new service point. The three-system sync runs automatically; no manual ticket to close the loop.</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span><span>C4C</span><span>GIS</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">11–13</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>Quote Agent <span style="font-size:0.7rem;font-weight:500;color:var(--muted);">(internal approval preserved)</span></h4>
+        <p>Auto-generates the Quote in Salesforce CCM from the ISU-calculated CIAC. The <strong>internal quote approval</strong> step is preserved — agents route to the right approver and drive the loop-back-for-modifications cycle, but the human authorisation gate stays. Approved quote is sent to customer for accept/reject.</p>
+        <div class="step-meta"><span>Salesforce CCM</span><span>SAP S/4 ISU</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">14–15</div><span class="step-layer hybrid">Hybrid</span></div>
+        <h4>Contract &amp; Signature Agent</h4>
+        <p>Generates the contract in Salesforce CCM with payment link, routes through DocuSign for e-signature, returns the signature confirmation back to Salesforce. Agent drives the cycle; customer retains full control over signing.</p>
+        <div class="step-meta"><span>Salesforce CCM</span><span>DocuSign</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">16–17</div><span class="step-layer lean">Lean Core</span></div>
         <h4>Payment Orchestration</h4>
-        <p>Straight-through invoicing in SAP ISU with digital wallet, escrow-on-construction, and auto-reconciliation. No finance clerk required.</p>
-        <div class="step-meta"><span>SAP ISU</span></div>
+        <p>Payment Vendor tracks the incoming payment. Payment-tracker monitors status; the 30/60/90-day follow-up actions run automatically in Salesforce. If unpaid, the contract is cancelled, <strong>TMD is marked for deletion in SAP S/4 ISU</strong>, and charges are reversed — a multi-system rollback that previously required manual cross-team coordination. Once paid, the payment posts to the contract/account in ISU and the Opportunity updates.</p>
+        <div class="step-meta"><span>Payment Vendor</span><span>Salesforce CCM</span><span>SAP S/4 ISU</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">7</div><span class="step-layer lean">Lean Core</span></div>
+        <div class="step-head"><div class="step-num">18–19</div><span class="step-layer lean">Lean Core</span></div>
         <h4>Construction Order Release</h4>
-        <p>SAP ISU auto-releases the construction order with materials pre-staged from the WAM warehouse — notification propagates to downstream systems.</p>
-        <div class="step-meta"><span>SAP ISU</span><span>SAP WAM</span></div>
+        <p>Work Order created in SAP S/4 WAM, assigned to the Construction Measure and WBSe. For <strong>gas</strong>: CN04 Main Line Construction sub-process. For <strong>electric</strong>: CN04 Electric Construction order, followed by the Service Line construction order. Branching preserved; agent ensures materials are staged.</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">8</div><span class="step-layer agentic">Agentic</span></div>
-        <h4>Dispatch Agent</h4>
-        <p>Optimizes crew assignment against weather, traffic, storm forecasts, skills, SLAs, and overtime budget. Expected uplift over legacy heuristic scheduling: measurable but to be validated in Phase 1 pilot — not claimed upfront.</p>
-        <div class="step-meta"><span>SAP SFS</span></div>
+        <div class="step-head"><div class="step-num">20</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>Meter Installation Order</h4>
+        <p>A distinct Meter Installation Order is created in SAP S/4 ISU against the Device Location(s), telling the system a physical meter must be installed. Separate from the WAM Work Order — both artefacts are kept.</p>
+        <div class="step-meta"><span>SAP S/4 ISU</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">9</div><span class="step-layer hybrid">Hybrid</span></div>
+        <div class="step-head"><div class="step-num">21–22</div><span class="step-layer agentic">Agentic</span></div>
+        <h4>Dispatch Agent <span style="font-size:0.7rem;font-weight:500;color:var(--muted);">(supervisor-authorised)</span></h4>
+        <p>SAP S/4 WAM Work Order released, corresponding Service Work Order created in <strong>Salesforce Field Service</strong>. Agent recommends crew assignment against weather, traffic, skills, SLAs, and rest-period compliance; dispatch supervisor retains release authority. SFS status flows SCH → NPRG → FCMP (Scheduled → In Progress → Field Complete).</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span><span>Salesforce Field Service</span></div>
+      </div>
+      <div class="step">
+        <div class="step-head"><div class="step-num">23</div><span class="step-layer hybrid">Hybrid</span></div>
         <h4>Field Closeout Agent</h4>
-        <p>Crew captures as-built photos; agent validates meter install, GPS, compliance, safety checks against design. Human only if anomaly detected.</p>
-        <div class="step-meta"><span>SAP SFS</span><span>Mobile</span></div>
+        <p>Crew captures completion and goods issue — meter and materials formally issued from inventory in SAP S/4 WAM; Meter Installation confirmed on the Device Location in SAP S/4 ISU. AI vision validates as-built photos against design; supervisor is looped in only if an anomaly is detected.</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span><span>SAP S/4 ISU</span><span>Salesforce Field Service</span></div>
       </div>
       <div class="step">
-        <div class="step-head"><div class="step-num">10</div><span class="step-layer lean">Lean Core</span></div>
-        <h4>GIS Sync &amp; Close</h4>
-        <p>Autonomous TMD update back to GIS, meter activation in SAP ISU, opportunity closed, billing started — all without a closeout coordinator.</p>
-        <div class="step-meta"><span>GIS</span><span>SAP ISU</span></div>
+        <div class="step-head"><div class="step-num">24–25</div><span class="step-layer lean">Lean Core</span></div>
+        <h4>Closeout &amp; Sync</h4>
+        <p>SAP Notification updated and closed in SAP S/4 WAM. Opportunity updated and closed in Salesforce CCM once all installations are confirmed. No manual closeout coordinator required.</p>
+        <div class="step-meta"><span>SAP S/4 WAM</span><span>Salesforce CCM</span></div>
       </div>
+    </div>
+
+    <div style="margin-top:2rem;padding:1.2rem 1.4rem;border:1px solid var(--border);border-radius:12px;background:var(--panel-2,#f9fafb);font-size:13px;line-height:1.6;color:var(--text);">
+      <strong>A note on case mix.</strong> Not every connection traverses every step. Roughly ~40% of residential requests require engineering design (and therefore the Design-from-Zero + PE stamp path); the remainder use a blanket pre-existing WBSe and skip the design-track entirely. Commercial requests almost always require design, and loads above the state PUC threshold additionally trigger the parallel DSIS regulatory track. Cycle-time claims in this document refer to the design-required residential case unless otherwise stated; blanket-WBSe cases are already faster today and offer less compression.
     </div>
   </div>
 </section>
@@ -454,7 +488,7 @@
         <div class="avatar">CA</div>
         <div>
           <div class="by">Contract Agent · Day 4 · 3:40 PM</div>
-          <div class="bub">Alex, your quote is ready: $8,420 contribution in aid of construction, $0 monthly until energized. DocuSign sent to alex@willowridge.com. Available crew windows shown — earliest URD slot in your zone: Day 19.</div>
+          <div class="bub">Alex, your quote is ready: CIAC calculated, $0 monthly until energized. DocuSign sent to alex@willowridge.com. Available crew windows shown — earliest URD slot in your zone: Day 19.</div>
         </div>
       </div>
       <div class="msg user">
@@ -468,7 +502,7 @@
         <div class="avatar">DA</div>
         <div>
           <div class="by">Dispatch Agent · Day 6 · 10:15 AM · internal</div>
-          <div class="bub">Payment cleared ($8,420 ACH). Construction order CO-338412 released. Crew Blue-7 assigned to Day 19 URD slot (lineman Rodriguez + apprentice Chen). Materials reserved at WH-North — will pull Day 18 PM.</div>
+          <div class="bub">Payment cleared via Payment Vendor (ACH). Construction order CO-338412 released. Crew Blue-7 assigned to Day 19 URD slot (lineman Rodriguez + apprentice Chen). Materials reserved at WH-North — will pull Day 18 PM.</div>
         </div>
       </div>
       <div class="msg agent">
