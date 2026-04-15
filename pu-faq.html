@@ -152,6 +152,9 @@
   <div class="hero-note">
     <strong>A note on scope:</strong> This program separates two value propositions with different risk profiles. <strong>(1) Coordination and workflow automation</strong> — eliminating queue time, document chasing, and handoffs. Deployable today with low regulatory friction; the business case stands on this alone. <strong>(2) Autonomous engineering design generation</strong> — valuable, but requires a formal validation program and regulatory engagement before production use. The recommended roadmap treats these as sequential phases, not a single launch.
   </div>
+  <div class="hero-note" style="margin-top:0.8rem;">
+    <strong>A note on numbers:</strong> This document intentionally avoids committing to specific dollar projections, headcount reduction figures, or payback periods ahead of Phase 1 pilot validation against your utility's actual operating data. Ranges, mechanisms, and structural claims are provided; absolute dollars are not. The cost build-up below shows the <em>shape</em> of the savings — which levers contribute, in what relative proportion — so the methodology is transparent without pre-committing to numbers that would need to be defended in a rate case or board meeting.
+  </div>
 </div>
 
 <div class="page">
@@ -192,6 +195,14 @@
       <div class="q">Does NERC CIP or state cybersecurity regulation affect the agent's access to operational data?</div>
       <div class="a">
         The agents read and write to CCM, SAP ISU, WAM, GIS, and SFS through existing API layers — they do not have direct access to SCADA, EMS, or any bulk electric system control systems. GIS access is limited to the distribution network model (not transmission). This architecture keeps the agent environment outside the NERC CIP Electronic Security Perimeter. That said, the utility's IT security team should review the API access scope and confirm that the agent service accounts are provisioned under the principle of least privilege. An OT/IT boundary review is standard practice before any new system integration and should be included in the Phase 1 deployment checklist.
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">How does this affect our next rate case? Does the OpEx reduction eventually flow back to ratepayers?</div>
+      <div class="a">
+        Yes — and this needs to be planned for, not discovered. New-connection coordination OpEx sits in O&amp;M, which is a pass-through in the traditional regulated-utility model. In a rate case 2–4 years after deployment, the PUC will look at actual O&amp;M and may rebase allowances downward, reducing the utility's retained benefit. Three strategic responses a CFO should consider: (1) <strong>Front-load the benefit window</strong> — most of the savings accrue in Years 1–3 before the next rate case; model the value on that basis, not in perpetuity. (2) <strong>Redirect engineering capacity rather than reduce it</strong> — engineers redeployed to grid-modernisation studies generate rate-base investment that <em>earns</em> allowed ROE, converting an OpEx saving into a regulated asset-base growth opportunity. This is the single most important financial lever in the program. Target redeployment scale is sized post-pilot based on actual time-saved-per-case data; it is deliberately not pre-committed here. (3) <strong>Capitalise the AI platform where permissible</strong> — work with regulatory counsel to determine whether implementation spend qualifies as a capital investment under the jurisdiction's software accounting treatment. The business case should be built with and without rate-case rebasing assumptions; showing both gives the board a defensible view.
+        <div class="callout note"><strong>This is why the engineering-capacity redirect matters more than the direct OpEx saving.</strong> The OpEx number attracts regulatory attention; the rate-base growth opportunity from accelerated grid-mod does not.</div>
       </div>
     </div>
   </div>
@@ -266,6 +277,22 @@
         Customer PII is handled within the utility's existing CCM data perimeter — the agent reads and writes through CCM APIs and does not create a separate customer data store. Engineering design data (GIS coordinates, asset IDs, load profiles) is treated as operational data and is not transmitted to external AI training infrastructure. Model training runs on-premises or in the utility's private cloud environment using de-identified historical design packages. All agent-to-system interactions are logged in a tamper-evident audit trail. Data retention policies for agent logs follow the utility's existing records management schedule.
       </div>
     </div>
+
+    <div class="qa">
+      <div class="q">If the Dispatch Agent sends a crew and an incident occurs in the field, who owns the liability?</div>
+      <div class="a">
+        Operational liability does not transfer to the agent. Final crew assignment authority rests with the dispatch supervisor — the agent produces a recommended plan which the supervisor reviews and releases. The SFS audit record captures the supervisor's release action against each assignment. In the event of a field incident, the standard incident investigation (OSHA-reportable or otherwise) examines the chain: crew action, supervisor release decision, and the inputs that informed the agent's recommendation. The agent's input set — crew qualifications, rest-period compliance, weather, skills match, site risk flags — is logged and available for incident review, which is a net improvement over current-state dispatch where reasoning is often undocumented. The utility's safety insurer and legal team should be engaged in Phase 1 to formalise the supervisor-authority model and update the dispatch standard operating procedure. Union consultation on this topic is required where collective-bargaining agreements govern dispatch practices.
+        <div class="callout note">The liability model is "agent recommends, human authorises" — the same structure used for flight dispatch advisory systems and hospital clinical decision support. It is legally well-understood; what changes is how the reasoning is documented.</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">What happens during storm response? Do the agents interfere with outage restoration?</div>
+      <div class="a">
+        The program includes an explicit storm-mode degradation path. When the utility's incident management system declares a storm event or a major restoration operation, the Dispatch Agent automatically yields SFS capacity to storm restoration — new-connection dispatch is queued and flagged to customers with a transparent status update ("scheduling paused due to storm response; your energisation date is being re-evaluated"). Intake, qualification, design, and contracting continue to run so the paperwork pipeline stays full, but no new construction orders are released to the field until storm-mode is cleared. Customer-facing messaging is drafted by the Intake Agent and released by the communications lead — not auto-published — so external tone is human-controlled during emergencies. The degraded-mode handoff and resumption behaviour should be validated in a Phase 1 tabletop exercise with the emergency operations team before production go-live.
+        <div class="callout ok">Storm-mode behaviour is a common regulatory examination topic. Documenting it explicitly in the operations manual is both good practice and sound risk management.</div>
+      </div>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════
@@ -280,7 +307,7 @@
     <div class="qa">
       <div class="q">Does this program eliminate PE or engineering jobs?</div>
       <div class="a">
-        No — it eliminates PE prep time and administrative queue management, not PE positions. In most utilities, engineers spend 60–70% of their time on document assembly, queue coordination, and rework chasing rather than engineering judgement. This program redirects that capacity toward higher-value work: grid modernisation studies, interconnection backlog review, renewable integration design, and complex commercial cases. Engineering team size stays flat or grows as the grid-mod programme accelerates. The headcount model targets redeployment, not reduction.
+        No — it eliminates PE prep time and administrative queue management, not PE positions. In most utilities, engineers spend a significant share of their time on document assembly, queue coordination, and rework chasing rather than engineering judgement. This program redirects that capacity toward higher-value work: grid modernisation studies, interconnection backlog review, renewable integration design, and complex commercial cases. Engineering team size stays flat or grows as the grid-mod programme accelerates. The headcount model targets redeployment, not reduction. The <em>scale</em> of redeployable capacity — how many engineers, across which specialties — is intentionally not pre-committed here; it is a Phase 1 output, sized against actual time-saved-per-case data from the pilot, not a benchmark assumption.
         <div class="callout ok"><strong>The strongest framing for engineering teams:</strong> "We are giving you back the engineering work. The agents handle the paperwork."</div>
       </div>
     </div>
@@ -288,7 +315,7 @@
     <div class="qa">
       <div class="q">What happens to the CSRs who currently handle new-connection intake and coordination?</div>
       <div class="a">
-        Straight-through residential cases — estimated at 58% of volume — are handled end-to-end without CSR involvement. The remaining 42% still require skilled CSR support: complex commercial cases, escalations, customers who prefer telephone interaction, and accommodation requests. The target operating model moves CSR roles from data-entry and queue management toward case management and customer advocacy for complex interactions. At a 12,000-connection-per-year utility, natural attrition over a 24-month transition absorbs most of the capacity reduction in the base case. No involuntary reductions are projected. Utilities with higher volumes or shorter transition windows should build a specific workforce transition plan.
+        Straight-through residential cases — estimated at roughly 58% of volume — are handled end-to-end without CSR involvement. The remaining ~42% still require skilled CSR support: complex commercial cases, escalations, customers who prefer telephone interaction, and accommodation requests. The target operating model moves CSR roles from data-entry and queue management toward case management and customer advocacy for complex interactions. In the base-case design, natural attrition over a 24-month transition window absorbs most of the capacity reduction, with no involuntary reductions projected. The workforce transition plan — including any specific redeployment or training pathways — should be sized against the utility's actual volume, current staffing model, and bargaining agreements in the Phase 1 planning workstream, not pre-committed to a benchmark number here.
       </div>
     </div>
 
@@ -310,51 +337,46 @@
     </div>
 
     <div class="qa">
-      <div class="q">Where does the $310 cost-per-connection savings figure come from? Show the build-up.</div>
+      <div class="q">Where do the savings come from? Show the structure, not the dollars.</div>
       <div class="a">
-        The $310 is the net savings per residential connection after netting AI infrastructure cost against gross labour and rework savings. Here is the full build-up:
+        The table below shows the <em>relative</em> contribution of each savings lever. Absolute dollar figures are intentionally withheld until Phase 1 pilot data validates them against your utility's actual labour rates, rework rate, and connection volume. The structural claim — which levers matter, in what proportion — is transferable across utilities; the absolute numbers are not.
 
         <table class="cost-table">
           <thead>
             <tr>
-              <th>Cost driver</th>
-              <th class="num">Legacy</th>
-              <th class="num">Reimagined</th>
-              <th class="num">Savings</th>
+              <th>Savings lever</th>
+              <th class="num">Share of total</th>
+              <th class="num">Confidence</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>CSR and coordination labour<span class="sub">18 fewer touchpoints × 30 min avg × $65/hr effective rate</span></td>
-              <td class="num">$975</td><td class="num">$195</td><td class="num">$780</td>
+              <td>CSR and coordination labour<span class="sub">Fewer touchpoints per connection; queue management eliminated. Driven by touchpoint count × avg handling time × loaded labour rate.</span></td>
+              <td class="num">~55%</td><td class="num">High</td>
             </tr>
             <tr>
-              <td>Engineering prep and queue management<span class="sub">PE prep 8 hrs → 2.5 hrs × $85/hr blended; queue coordination eliminated</span></td>
-              <td class="num">$680</td><td class="num">$213</td><td class="num">$467</td>
+              <td>Engineering prep and queue management<span class="sub">PE prep time compressed; queue coordination eliminated. Driven by PE prep hours × blended engineering rate.</span></td>
+              <td class="num">~30%</td><td class="num">Medium</td>
             </tr>
             <tr>
-              <td>Rework and re-inspection cost<span class="sub">18% rework rate → 3.8% × avg $480 rework event cost</span></td>
-              <td class="num">$185</td><td class="num">$18</td><td class="num">$167</td>
+              <td>Rework and re-inspection avoidance<span class="sub">Driven by current-state rework rate × avg rework event cost. Highly utility-specific.</span></td>
+              <td class="num">~15%</td><td class="num">Medium</td>
             </tr>
             <tr>
-              <td>AI infrastructure &amp; licensing offset<span class="sub">$8M implementation ÷ 3 yr ÷ 12,000 connections/yr</span></td>
-              <td class="num">—</td><td class="num">$222</td><td class="num">($222)</td>
-            </tr>
-            <tr class="total">
-              <td>Net savings per connection</td>
-              <td class="num">$1,840</td><td class="num">$648</td><td class="num">$1,192</td>
+              <td>AI infrastructure &amp; licensing<span class="sub">Offset against gross savings. Implementation amortised over 3 years; annual run-rate cost included in per-connection model.</span></td>
+              <td class="num">Offset</td><td class="num">High</td>
             </tr>
           </tbody>
         </table>
-        <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;">These assumptions should be stress-tested against your utility's actual labour cost structure, rework rate, and connection volume. The labour rates are representative for a mid-sized US investor-owned utility; publicly-owned utilities with different wage structures will produce different numbers.</div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;">CSR/coordination labour is the largest single lever and the highest-confidence estimate because touchpoint counts are directly measurable from existing case data. Engineering prep is a material second lever but depends on the utility's current PE workflow — some utilities already use templates and have less to compress. Rework savings are real but the most variable across utilities. The per-connection saving, annual savings, payback period, and implementation envelope should all be modelled against your specific inputs during Phase 1 scoping.</div>
       </div>
     </div>
 
     <div class="qa">
-      <div class="q">What is the payback period, and what assumptions drive it?</div>
+      <div class="q">What about payback period and total annual savings?</div>
       <div class="a">
-        At $1,192 net savings per connection and 12,000 connections per year, net annual savings are approximately <strong>$14.3M</strong>. Against an implementation cost of $8–12M (depending on data readiness and integration complexity), payback is <strong>7–10 months</strong> on direct OpEx savings alone, before the value of engineering capacity release is included. At a utility carrying a $250M grid-modernisation backlog, redirecting 25–30 engineering FTEs toward that backlog has a value that substantially exceeds the direct OpEx case — but that value is harder to quantify and should be kept separate from the primary business case to preserve credibility with a CFO audience.
-        <div class="callout note">The payback calculation is most sensitive to the rework rate assumption and the labour cost inputs. Utilities with better current-state rework rates will see a smaller improvement; utilities with worse rates (common in high-growth corridors where GIS data quality is low) will see a larger one.</div>
+        These are deliberately not quoted in this document. Payback period is a function of (a) implementation cost envelope, which is driven by API integration complexity and data readiness, (b) per-connection savings, which is utility-specific, and (c) connection volume. All three inputs need to be established against the utility's actual operating profile before a payback figure becomes meaningful. <strong>Directionally:</strong> for a mid-sized US utility with modern API infrastructure and clean GIS data, payback is measured in months rather than years on direct OpEx savings alone, before any engineering-capacity redirect value is included. A firmer range will come out of the Phase 1 scoping exercise, with pilot data confirming or adjusting it in Phase 2.
+        <div class="callout note">Committing to a specific payback period ahead of pilot validation creates a hostage to fortune — both internally (versus actuals) and externally (in future rate cases). The discipline of holding back the number until it can be grounded in your data is a feature, not a gap.</div>
       </div>
     </div>
 
@@ -382,7 +404,7 @@
             </div>
             <div class="rm-desc">
               <div class="rm-scope">Design generation pilot — advisory mode with parallel PE review</div>
-              Deploy Design-from-Zero in shadow mode: agent generates draft, PE independently reviews from scratch, outputs compared. Validate agreement rate ≥95% over 500 cases across residential and light commercial. Engage state PUC and engineering licensing board with validation study results. No construction orders released from agent designs until validation is complete and regulatory engagement is documented. <strong>Go/no-go gate:</strong> ≥95% PE agreement rate, regulatory sign-off received, PE training programme complete.
+              Deploy Design-from-Zero in shadow mode: agent generates draft, PE independently reviews from scratch, outputs compared. Validate agreement rate ≥95% over 500 cases across residential and light commercial — this is the <em>internal engineering QA gate</em>, not a regulatory clearance. In parallel, a separate 12–18 month regulatory engagement track runs with the state PUC and engineering licensing board (TBPE in Texas, BPELSG in California, and equivalents): pre-filing notice, validation study review, public comment period, and formal no-objection. State boards have publicly signalled caution on AI-assisted design, and 500 cases is not by itself sufficient to clear them. No construction orders are released from agent-drafted designs until both tracks complete. <strong>Go/no-go gate:</strong> ≥95% PE agreement rate, regulatory no-objection received, PE training programme complete.
             </div>
           </div>
           <div class="rm-row">
@@ -401,11 +423,11 @@
     </div>
 
     <div class="qa">
-      <div class="q">What does the Phase 1 pilot cost, and what does success look like?</div>
+      <div class="q">What does Phase 1 pilot cost, and what does success look like?</div>
       <div class="a">
-        Estimated Phase 1 cost: <strong>$1.2M–$1.8M</strong> depending on integration complexity and data readiness. The range is primarily driven by the condition of the utility's existing API layer — a utility with modern REST APIs for SAP ISU and CCM will be at the low end; one requiring middleware development will be at the high end.
+        Phase 1 cost is deliberately not quoted as a firm figure here — it is driven primarily by the condition of the utility's existing API layer, the availability of CCM and SAP ISU REST interfaces, and the quality of GIS and WAM data. A utility with modern REST APIs and clean master data will sit at the low end of the range; one requiring middleware development or a master-data remediation workstream will sit materially higher. The cost envelope should be established in a scoping exercise ahead of Phase 1 kickoff, with a firm budget committed only after the integration discovery is complete.
 
-        Success at the end of Phase 1 means: (1) cycle time reduced by ≥25% on the pilot cohort versus the prior-year control group in the same territory; (2) human touchpoints per connection reduced to ≤8 (not yet at the full 5-touchpoint target — that comes with design generation in Phase 2); (3) transaction failure rate &lt;0.5%; (4) field rework rate unchanged or improved; (5) operator satisfaction score ≥7/10 from CSR and dispatch teams. The pilot should be run with a dedicated operations monitor who documents every edge case and failure mode — these learnings directly shape Phase 2 design and are more valuable than the KPI results alone.
+        Success at the end of Phase 1 is defined by outcomes, not dollars: (1) cycle time reduced by ≥25% on the pilot cohort versus the prior-year control group in the same territory; (2) human touchpoints per connection meaningfully reduced (the full target comes with design generation in Phase 2); (3) transaction failure rate &lt;0.5%; (4) field rework rate unchanged or improved; (5) operator satisfaction score ≥7/10 from CSR and dispatch teams. The pilot should be run with a dedicated operations monitor who documents every edge case and failure mode — these learnings directly shape Phase 2 design and are more valuable than the KPI results alone.
       </div>
     </div>
 
